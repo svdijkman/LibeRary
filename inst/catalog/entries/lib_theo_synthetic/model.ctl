@@ -1,0 +1,27 @@
+$PROBLEM THEO - oral 2-compartment
+$SUBROUTINES ADVAN4 TRANS4
+$INPUT AMT TIME EVID CMT MDV DV F1 S1 KA
+$DATA theo.csv IGNORE=@
+$THETA
+ (0, 3, 30) ; THETA1
+ (0, 20, 200) ; THETA2
+ (0, 50, 500) ; THETA3
+ (0, 10, 100) ; THETA4
+ (0, 1, 10) ; THETA5
+$OMEGA
+ 0.05
+ 0.05
+ 0.05
+$SIGMA
+ 0.01
+ 0.25
+$PK
+CL = THETA(1) * exp(ETA(1))
+VC = THETA(2) * exp(ETA(2))
+VP = THETA(3)
+Q2 = THETA(4)
+KA = THETA(5) * exp(ETA(3))
+S2 = VC
+S3 = VP
+$ERROR
+Y = F * (1 + ERR(1)) + ERR(2)

@@ -1,0 +1,101 @@
+entrez:
+  tool: LibeRary
+  email: "you@example.org"           # required by NCBI E-utilities
+  api_key: ""                        # prefer ENTREZ_KEY; do not commit secrets
+  requests_per_second: 1
+
+unpaywall:
+  email: "you@example.org"
+  requests_per_second: 1
+
+europe_pmc:
+  requests_per_second: 1
+
+# Leave paths blank for the upgrade-safe tools::R_user_dir("LibeRary") store.
+data_dir: ""
+inbox_dir: ""
+cache_dir: ""
+
+fetch:
+  timeout_seconds: 120
+  use_chromote_fallback: false
+  user_agent: "LibeRary/0.7.0 (R; pharmacometric literature ingest)"
+
+triage:
+  enabled: true
+  high_threshold: 0.70
+  intermediate_threshold: 0.30
+  first_pass_tiers: [high, intermediate]
+  retain_low_backlog: true
+
+# Install Docling separately and ensure this executable is on PATH. The
+# standard parser is intentionally independent from the raw-page vision lane.
+docling:
+  executable: docling
+  pipeline: standard
+  output_formats: [json, md, html]
+  ocr: true
+  tables: true
+  table_mode: accurate
+  timeout_seconds: 1800
+  allow_pdf_text_fallback: true
+  render_dpi: 140
+  max_vision_pages: 12
+
+# Every extracted model receives a conservative reproduction plan. Enable
+# auto_run to execute plans that have a complete model, numerical dose and no
+# unresolved generated parameters. Results are consistency evidence, not a
+# substitute for external model validation.
+reproduction:
+  enabled: true
+  auto_run: false
+  nsim: 200
+  seed: 20260716
+  n_cores: 1
+  allow_generated_defaults: false
+
+ollama:
+  base_url: "http://127.0.0.1:11434"
+  model: ""                          # legacy alias; prefer llm.indexing below
+  timeout_seconds: 600
+  max_pdf_chars: 120000
+  num_ctx: 16384                     # prevent long reconciliation prompts using Ollama's 4096 default
+  num_predict: 8192                  # allow complete strict-schema reconciliation output
+  think: false
+
+llm:
+  allow_remote_content: false
+  require_independent_extraction_models: false
+  structured_retries: 1               # retry invalid/truncated structured JSON once
+  triage:
+    provider: same                    # same means use indexing provider defaults
+    model: ""
+    temperature: 0
+  indexing:
+    provider: ollama                  # none, ollama, openai, openai_compatible
+    model: ""                        # blank selects first discovered model
+    temperature: 0
+  vision:
+    provider: same
+    model: ""                        # select a vision-capable model
+    temperature: 0
+  assessment:
+    provider: same                    # same, none, ollama, openai, openai_compatible
+    model: ""
+    temperature: 0
+  adjudication:
+    provider: same
+    model: ""
+    temperature: 0
+  providers:
+    ollama:
+      base_url: "http://127.0.0.1:11434"
+      api_key_env: OLLAMA_API_KEY
+    openai:
+      base_url: "https://api.openai.com"
+      api_key_env: OPENAI_API_KEY
+    openai_compatible:
+      base_url: "http://127.0.0.1:1234"
+      api_key_env: LIBERARY_LLM_API_KEY
+
+catalog_dir: ""

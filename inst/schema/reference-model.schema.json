@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://svdijkman.github.io/LibeRary/schema/reference-model-1.1.0.json",
+  "title": "LibeRary pharmacometric reference model",
+  "type": "object",
+  "required": [
+    "schema_version", "corpus_id", "reference_id", "article_id", "pmid",
+    "partition", "source", "raw", "reference", "provenance", "quality"
+  ],
+  "properties": {
+    "schema_version": {"enum": ["1.0.0", "1.1.0"]},
+    "corpus_id": {"type": "string"},
+    "reference_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"},
+    "article_id": {"type": "string"},
+    "pmid": {"type": "string", "pattern": "^[0-9]{5,9}$"},
+    "model_index": {"type": "integer", "minimum": 1},
+    "compound_group": {"type": "string"},
+    "family_id": {"type": "string"},
+    "partition": {"enum": ["train", "validation", "test"]},
+    "source": {"type": "object"},
+    "raw": {"type": "object"},
+    "reference": {
+      "type": "object",
+      "required": ["extraction_target", "study", "covariates", "validation"]
+    },
+    "provenance": {"type": "object"},
+    "quality": {
+      "type": "object",
+      "required": ["tier", "review_status", "strict_score_eligible", "training_eligible", "issues"],
+      "properties": {
+        "tier": {"enum": ["A", "B", "C", "D"]},
+        "review_status": {"type": "string"},
+        "strict_score_eligible": {"type": "boolean"},
+        "training_eligible": {"type": "boolean"},
+        "issues": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  }
+}

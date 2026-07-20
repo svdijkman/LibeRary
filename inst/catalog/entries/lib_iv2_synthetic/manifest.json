@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.1.0",
+  "library_id": "lib_iv2_synthetic",
+  "version": "1.0.1",
+  "status": "validated",
+  "title": "IV bolus — 2-compartment",
+  "model": {
+    "artifact": "model.ctl",
+    "advan": 3,
+    "trans": 4,
+    "type": "pk",
+    "use_ode": false
+  },
+  "study": {
+    "compound": "generic drug (synthetic)",
+    "population": "general (synthetic IV bolus 2-compartment)",
+    "route": "iv_bolus",
+    "n_subjects": null,
+    "keywords": ["population pk", "synthetic", "iv2"],
+    "dataset_fingerprint": "synthetic:iv2"
+  },
+  "confidence": {
+    "overall": 1,
+    "fields": {
+      "structure": 1,
+      "parameters": 1,
+      "population": 1
+    }
+  },
+  "provenance": {
+    "source_type": "synthetic",
+    "origin": "LibeRation",
+    "synthetic_id": "iv2",
+    "description": "Intravenous bolus, 2-compartment (ADVAN 3, TRANS 4)."
+  },
+  "qualification": {
+    "author_validated": true,
+    "curator": "LibeRation synthetic gold standard"
+  },
+  "relations": {
+    "same_compound": [],
+    "prior_version": [],
+    "mbma_pool": false
+  }
+}

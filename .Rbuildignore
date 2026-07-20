@@ -1,0 +1,9 @@
+^\.git$
+^README\.md$
+^LICENSE\.md$
+^tools$
+^inst/tools/__pycache__$
+^\.github$
+^config\.yml$
+^liberary_data$
+^repository$

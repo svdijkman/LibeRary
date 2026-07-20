@@ -1,0 +1,8 @@
+.Rhistory
+.RData
+.Rproj.user/
+config.yml
+liberary_data/
+repository/
+inst/config.yml
+inst/shiny-ingest/liberary_data/

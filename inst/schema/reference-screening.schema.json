@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://svdijkman.github.io/LibeRary/schema/reference-screening-1.1.0.json",
+  "title": "LibeRary pharmacometric screening reference",
+  "type": "object",
+  "required": [
+    "schema_version", "screening_id", "pmid", "compound_group", "partition",
+    "relevant_model", "recoverable_model", "label_quality", "source"
+  ],
+  "properties": {
+    "schema_version": {"enum": ["1.0.0", "1.1.0"]},
+    "screening_id": {"type": "string"},
+    "pmid": {"type": "string", "pattern": "^[0-9]{5,9}$"},
+    "compound_group": {"type": "string"},
+    "partition": {"enum": ["train", "validation", "test"]},
+    "relevant_model": {"type": "boolean"},
+    "recoverable_model": {"type": "boolean"},
+    "exclusion_reason": {"type": ["string", "null"]},
+    "label_quality": {"type": "string"},
+    "source": {"type": "object"}
+  }
+}

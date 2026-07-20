@@ -1,0 +1,39 @@
+Package: LibeRary
+Title: Pharmacometric Model Repository for the LibeR Ecosystem
+Version: 0.7.1
+Authors@R:
+    person("Sven C.", "van Dijkman", email = "svdijkman@users.noreply.github.com", role = c("aut", "cre"))
+Description: Searchable, versioned pharmacometric model repository and literature
+    ingestion workflow for the LibeR ecosystem. Discovers publications, acquires
+    full text, extracts and independently reconciles model evidence with
+    user-selectable local or remote language models, retains auditable provenance,
+    and imports NONMEM-style models into LibeRation workspaces.
+License: MIT + file LICENSE
+Depends:
+    R (>= 4.1.0)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+Imports:
+    digest,
+    httr2,
+    jsonlite,
+    rentrez,
+    tools,
+    utils,
+    xml2
+Suggests:
+    callr,
+    chromote,
+    DT,
+    knitr,
+    LibeRation (>= 0.6.0),
+    LibeRties (>= 0.6.0),
+    pdftools,
+    rmarkdown,
+    devtools,
+    shiny,
+    testthat (>= 3.0.0),
+    yaml
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+Config/roxygen2/version: 8.0.0

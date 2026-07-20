@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.1.0",
+  "updated_at": "2026-07-08T00:13:35+0000",
+  "entries": [
+    {
+      "library_id": "lib_theo_synthetic",
+      "title": "THEO — oral 2-compartment",
+      "status": "validated"
+    },
+    {
+      "library_id": "lib_iv1_synthetic",
+      "title": "IV bolus — 1-compartment",
+      "status": "validated"
+    },
+    {
+      "library_id": "lib_iv2_synthetic",
+      "title": "IV bolus — 2-compartment",
+      "status": "validated"
+    }
+  ]
+}

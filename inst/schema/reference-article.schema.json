@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://svdijkman.github.io/LibeRary/schema/reference-article-1.1.0.json",
+  "title": "LibeRary pharmacometric reference article",
+  "type": "object",
+  "required": ["schema_version", "article_id", "pmid", "compounds", "model_ids", "partition"],
+  "properties": {
+    "schema_version": {"enum": ["1.0.0", "1.1.0"]},
+    "article_id": {"type": "string"},
+    "pmid": {"type": "string", "pattern": "^[0-9]{5,9}$"},
+    "title": {"type": "string"},
+    "abstract": {"type": "string"},
+    "compounds": {"type": "array", "items": {"type": "string"}},
+    "model_ids": {"type": "array", "items": {"type": "string"}},
+    "partition": {"enum": ["train", "validation", "test"]}
+  }
+}

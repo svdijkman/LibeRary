@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.1.0",
+  "library_id": "lib_theo_synthetic",
+  "version": "1.0.1",
+  "status": "validated",
+  "title": "THEO — oral 2-compartment",
+  "model": {
+    "artifact": "model.ctl",
+    "advan": 4,
+    "trans": 4,
+    "type": "pk",
+    "use_ode": false
+  },
+  "study": {
+    "compound": "theophylline",
+    "population": "general (synthetic teaching dataset)",
+    "route": "oral",
+    "n_subjects": null,
+    "keywords": ["population pk", "synthetic", "theo"],
+    "dataset_fingerprint": "synthetic:theo"
+  },
+  "confidence": {
+    "overall": 1,
+    "fields": {
+      "structure": 1,
+      "parameters": 1,
+      "population": 1
+    }
+  },
+  "provenance": {
+    "source_type": "synthetic",
+    "origin": "LibeRation",
+    "synthetic_id": "theo",
+    "description": "Theophylline-style oral 2-compartment PK (ADVAN 4, TRANS 4). Classic teaching dataset (Schumitzky & Jelliffe; NONMEM THEO demo)."
+  },
+  "qualification": {
+    "author_validated": true,
+    "curator": "LibeRation synthetic gold standard"
+  },
+  "relations": {
+    "same_compound": [],
+    "prior_version": [],
+    "mbma_pool": false
+  }
+}

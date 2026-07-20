@@ -1,0 +1,252 @@
+---
+title: "LibeRary autonomous evidence workflow"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LibeRary autonomous evidence workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+LibeRary separates discovery, acquisition, document intelligence, independent
+model extraction, reconciliation, catalogue publication, and scientific
+qualification. This enables a largely self-running literature workflow without
+misrepresenting machine agreement as human validation.
+
+## Durable configuration
+
+`library_home()` is outside the installed package, so reinstalls do not remove
+catalogues, search manifests, triage backlogs, logs, PDFs, document bundles, or
+model selections. Secrets stay in environment variables.
+
+```{r, eval=FALSE}
+library(LibeRary)
+cfg <- ingest_load_config()
+cfg$entrez$email <- "you@example.org"
+library_save_config(cfg)
+```
+
+The ingestion GUI automatically saves these non-secret settings before each
+job. The NCBI email identifies the E-utilities operator; it is not an API key.
+An API key is optional at three requests/second or less. For higher rates, put
+the key in `ENTREZ_KEY` (or enter it for the current GUI session); LibeRary does
+not write secrets to its YAML configuration.
+
+## Five selectable LLM roles
+
+The roles are `triage`, `indexing` (investigation and synthesis), `vision`
+(original PDF extraction and verification), `assessment` (skeptical evidence
+review), and `adjudication`. Each can select an available
+model from Ollama, OpenAI, or an OpenAI-compatible endpoint.
+
+```{r, eval=FALSE}
+library_llm_models("ollama", cfg, role = "indexing")
+
+cfg$llm$triage$provider <- "same"
+cfg$llm$indexing$model <- "text-model"
+cfg$llm$vision$model <- "vision-model"
+cfg$llm$adjudication$model <- "adjudication-model"
+cfg$llm$require_independent_extraction_models <- FALSE
+```
+
+Every role may also define an `instruction` override. The ingestion GUI exposes
+this beside the provider/model controls. Saving persists the override; restoring
+the default removes it so the role follows the package instruction again.
+
+Remote content transfer is disabled until
+`cfg$llm$allow_remote_content <- TRUE`. This is an explicit data-transfer guard,
+independent of the article-acquisition workflow.
+
+## Search, triage, and backlog
+
+```{r, eval=FALSE}
+found <- ingest_discover(limit = 100, cfg = cfg)
+found$summary
+found$low_backlog_path
+```
+
+The triage LLM sees only the title and abstract. Its probability is converted
+to deterministic thresholds. High and Intermediate records enter the default
+first pass. Low records are not deleted or marked irrelevant: they are retained
+both in the complete manifest and in a dedicated backlog CSV.
+
+The backlog can later be acquired and processed explicitly:
+
+```{r, eval=FALSE}
+ingest_fetch_institutional(
+  found$manifest_path, cfg = cfg,
+  classes = "deferred_low", tiers = "low"
+)
+ingest_process_batch(found$manifest_path, cfg = cfg, tiers = "low")
+```
+
+## Canonical document bundles
+
+`ingest_document_bundle()` stores an immutable source hash and creates a
+content-addressed directory containing:
+
+- the acquired source PDF;
+- Docling standard-pipeline JSON, Markdown, and optional HTML;
+- parser name, version, settings, logs, and fallback status;
+- selected page images rendered directly from the original PDF; and
+- the acquisition path and SHA-256 content identity.
+
+Docling standard parsing is deliberately separate from the VLM lane. If
+Docling is unavailable and fallback is enabled, LibeRary records a degraded
+`pdftools_fallback` rather than pretending the layout-aware parse succeeded.
+
+```{r, eval=FALSE}
+ingest_docling_available(cfg)
+bundle <- ingest_document_bundle(metadata, "article.pdf", cfg)
+```
+
+## Deliberative investigation, dual extraction, and reconciliation
+
+The parsed-text path is not a one-shot extraction. It first maps all models
+discussed in the article, then runs focused investigations of structure,
+THETAs/covariates, OMEGA/IOV, SIGMA/observation model, population/dosing, and
+reproduction data. A skeptical model challenges the evidence ledger, targeted
+gap-search rounds revisit unresolved questions, and a vision model can verify
+material claims against the original PDF pages. Deterministic completeness and
+consistency checks run before an evidence-constrained synthesis produces the
+standard LibeRary schema.
+
+Each stage is content-addressed and cached beside the document bundle. The
+ledger records reported, derived, inferred, conflicting, and unresolved claims
+with source locators. A copy is preserved with every published catalogue
+version. The legacy one-shot text path remains available by setting
+`cfg$deliberative$enabled <- FALSE`.
+
+The independent vision lane then reads selected original PDF pages, including
+equations, tables, figures, captions, and footnotes. Both final lanes return the
+same strict pharmacometric schema with evidence locators.
+
+```{r, eval=FALSE}
+dual <- ingest_dual_extract(metadata, bundle, cfg, adjudicate = TRUE)
+dual$comparison$differences
+dual$status
+```
+
+Claims such as model presence, canonical structure, ADVAN/TRANS, THETA, OMEGA,
+SIGMA, covariates, population cohorts, demographics, CYP records, dosing, and
+digitized concentration targets are compared field by field. A third configured
+model adjudicates discrepancies against both source representations. Only
+unresolved major fields require review by default.
+
+The extraction schema stores both the publication's reported variability number
+and its metric. The catalogue mapper converts CV and SD quantities to NONMEM
+variance scale, distinguishes additive normal ETAs from exponential/log-normal
+ETAs, preserves IIV versus IOV, and writes supplied correlations/covariances as
+block OMEGA records. Ambiguous variability, shrinkage, RSEs, confidence
+intervals, or bootstrap precision are not silently treated as OMEGA/SIGMA.
+
+Terminal machine outcomes are:
+
+- `machine_consistent`: both lanes agree on the material claims;
+- `machine_adjudicated`: discrepancies were resolved without a remaining major
+  conflict; and
+- `needs_review`: a lane failed or a major field remains unresolved.
+
+These are not equivalent to `validated`.
+
+## Canonical implementation semantics
+
+The extraction represents the mathematical structure before selecting a
+NONMEM implementation: compartment count, input process, elimination type, and
+parameterization are separate fields. Explicitly reported ADVAN/TRANS values
+are retained as reported. In their absence, common linear one-, two-, and
+three-compartment structures can be mapped to ADVAN1/2/3/4/11/12 with TRANS1,
+TRANS2, or TRANS4 as appropriate. The mapping records provenance, confidence,
+rationale, alternatives, and whether review remains required. Ambiguous or
+nonlinear structures remain unresolved with general ODE implementations as
+alternatives.
+
+```{r, eval=FALSE}
+enriched <- library_model_enrich(extraction)
+enriched$structural_model$canonical
+enriched$structural_model$implementations
+```
+
+Population data are cohort-aware. The original text is never discarded, and
+mean/SD, median/quantiles, ranges, category counts, and individual values can
+coexist for a descriptor. Dosing and pharmacogenetic evidence follow the same
+source-locator and confidence convention.
+
+## Conservative reproduction checks
+
+Published catalogue entries contain a reproduction plan when the feature is
+enabled. Auto-execution is off by default. The plan is deliberately blocked
+when an implementation is unresolved, a dose or unit is missing, a normalized
+dose lacks weight/BSA, a steady-state regimen lacks an interval, an infusion
+lacks a duration, the model does not compile, or generated parameter defaults
+would be required.
+
+```{r, eval=FALSE}
+plan <- library_reproduction_plan(enriched)
+if (plan$eligible) {
+  result <- library_reproduction_run(
+    plan, "reproduction/pmid-123", nsim = 200, n_cores = 4
+  )
+}
+```
+
+When figure/table concentration targets are available, LibeRation simulates a
+typical profile and a population distribution and writes the event datasets,
+simulations, comparison metrics, audit JSON, and a persistent plot. A close
+reproduction supports computational consistency under the recorded assumptions;
+it is not independent scientific validation.
+
+## End-to-end processing and publication
+
+```{r, eval=FALSE}
+result <- ingest_process_batch(
+  found$manifest_path,
+  cfg = cfg,
+  tiers = c("high", "intermediate"),
+  resume = TRUE,
+  adjudicate = TRUE
+)
+library_list(root = cfg$catalog_dir)
+```
+
+Article decisions are saved beside the document bundle, so an interrupted run
+can resume at its last valid investigation stage. Papers without a recoverable model receive an auditable exclusion
+decision rather than an empty catalogue entry. Published models retain the
+source hash, parser, dual-lane audit, comparison, and adjudication.
+
+With `resume = TRUE`, only terminal decisions with the same source hash,
+pipeline, and prompt version are reused, including review-required decisions.
+Older one-shot decisions are therefore
+upgraded automatically. Use `resume = FALSE` for a deliberate re-extraction, in
+which case catalogue replacement uses the normal version-history path.
+
+## LibeRation and LibeRties
+
+Catalogue entries import through LibeRation's public control-stream parser and
+compiler. The original catalogue identity and qualification state remain
+attached to the model version.
+
+```{r, eval=FALSE}
+imported <- library_use_in_workspace(
+  "pmid_12345678",
+  workspace = LibeRation::nm_workspace()
+)
+```
+
+The restricted LibeRties contract supports all pipeline stages. It cannot
+contain functions, environments, external pointers, or API keys.
+
+```{r, eval=FALSE}
+job <- library_job(
+  "dual_extract", metadata,
+  pdf_path = "article.pdf",
+  confirm_transfer = TRUE,
+  cfg = cfg
+)
+queue$submit(job)
+```
+
+Workers return evidence results and never publish into a catalogue implicitly.

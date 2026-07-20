@@ -1,0 +1,179 @@
+---
+title: "Reference corpora, protected benchmarks, and local adapters"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Reference corpora, protected benchmarks, and local adapters}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+LibeRary keeps reference answers outside its live catalogue. This prevents a
+benchmark answer from entering retrieval, prompts, demonstrations, or model
+training before a protected evaluation.
+
+## Corpus layout and quality tiers
+
+`library_reference_build()` reads the drug-specific v2 systematic-review
+supplements. It creates separate article, model, and screening JSON documents,
+plus deterministic PMID-level partition indexes. One PMID is always confined
+to one partition.
+
+The original appendix row is retained in `raw`. The normalized LibeRary target
+is stored under `reference$extraction_target`. Version 0.2.2 also adds structured
+cohorts/demographics, dosing, canonical model semantics, inferred or unresolved
+ADVAN/TRANS implementations, and reproduction targets. Normalization therefore
+remains auditable and never silently changes the historical review.
+
+Reference tiers have different meanings:
+
+- A: directly reported and independently checked;
+- B: deterministically derived and independently checked;
+- C: appendix reconstruction or assumption requiring source review; and
+- D: incomplete or unresolved.
+
+Only A/B records are strict benchmark targets. C/D results remain useful silver
+development metrics; additional predictions are called *unverified extras*,
+not hallucinations, because an incomplete reference cannot prove absence.
+
+```{r, eval=FALSE}
+library(LibeRary)
+
+root <- "validation/liberary/aed-pkpd-reference/0.2.2"
+library_reference_build("AED_PKPD", root, version = "0.2.2")
+library_reference_validate(root, check_hashes = TRUE,
+                           source_dir = "AED_PKPD")
+library_reference_list(root)
+```
+
+## Target-blind baseline
+
+The runner constructs a source-only work list containing article identity and
+PDF location. It never reads `reference$extraction_target` when creating a
+prompt. Prediction envelopes explicitly record that safeguard.
+
+```{r, eval=FALSE}
+cfg <- ingest_load_config()
+
+library_reference_run(
+  root = root,
+  source_dir = "AED_PKPD",
+  output_dir = "benchmark/aed-current",
+  cfg = cfg,
+  task = "extraction",
+  partition = "test",
+  resume = TRUE,
+  assess = FALSE
+)
+
+score <- library_reference_benchmark(
+  root,
+  "benchmark/aed-current/predictions",
+  task = "extraction",
+  partition = "test",
+  output_dir = "benchmark/aed-current/report"
+)
+score$summary
+```
+
+Extraction scoring covers normalized scalar fields, model structure, and
+THETA/OMEGA/SIGMA/covariance values with declared numeric tolerances. A separate
+semantic score covers canonical structure, implementation inference, cohort
+counts and demographic summaries, dosing, and any reproduction targets. These
+scores remain in the silver tier until their source fields have been reviewed,
+so appendix inferences are not treated as strict truth. Triage
+scoring reports Brier score, log loss, AUROC, average precision, sensitivity,
+and specificity. Wrong-drug and unspecified historic exclusions are omitted
+from the general-model triage score because they are query-specific or
+ambiguous negatives.
+
+## Side-by-side review
+
+The review application presents three deliberately separate representations:
+
+1. the historical appendix row under `raw`;
+2. the normalized benchmark answer under `reference$extraction_target`; and
+3. the selected LibeRary prediction (primary, text, vision, or reconciled).
+
+```{r, eval=FALSE}
+library_reference_shiny(
+  corpus = "validation/liberary/aed-pkpd-reference/0.2.2",
+  predictions = "validation/liberary/aed-pkpd-benchmark/text-current/predictions",
+  source_dir = "AED_PKPD"
+)
+
+# The same application is available through the general launcher.
+library_shiny(mode = "reference", reference_root = root,
+              predictions = "benchmark/current/predictions",
+              source_dir = "AED_PKPD")
+```
+
+The field table uses JSON pointers, so a decision remains unambiguous even
+when labels repeat within THETA, OMEGA, covariance, or SIGMA arrays. Choosing a
+LibeRary or custom value changes only the successor's normalized target. The
+verbatim appendix row is immutable. Model and field decisions are exported as
+separate audit tables before the successor corpus is created.
+
+## Review without rewriting history
+
+Curation produces a new corpus directory. A compact CSV can promote records
+after source-paper review:
+
+```text
+reference_id,tier,training_eligible,review_status,notes
+aed_phb_23018530_m01,B,TRUE,reviewed,Checked equation and parameter table
+```
+
+```{r, eval=FALSE}
+library_reference_revise(
+  root,
+  "validation/liberary/aed-pkpd-reference/0.2.0",
+  decisions = "review-decisions.csv",
+  version = "0.2.0",
+  curator = "reviewer-id"
+)
+```
+
+Trying to make a test record training-eligible is an error. Test records can
+still be promoted to A/B so they become stronger benchmark targets.
+
+## Training exports
+
+The extraction export pairs source-PDF text with the reviewed JSON answer. It
+does not use the appendix as input. By default it exports only explicitly
+training-eligible A/B records from train and validation partitions.
+
+```{r, eval=FALSE}
+library_reference_training_export(
+  "validation/liberary/aed-pkpd-reference/0.2.0",
+  source_dir = "AED_PKPD",
+  output_dir = "training/aed-pkpd",
+  tasks = c("extraction", "triage"),
+  partitions = c("train", "validation")
+)
+```
+
+Adjudication examples are not manufactured from the answer. They require real
+stored text-lane and vision-lane candidates, source evidence, and a reviewed
+resolution.
+
+The optional packaged Python trainer validates every JSONL row before loading
+PyTorch. Locate it from either a source or installed package with
+`library_reference_training_files()`:
+
+```text
+python <trainer-path> \
+  --train-file training/aed-pkpd/extraction_train.jsonl \
+  --eval-file training/aed-pkpd/extraction_validation.jsonl \
+  --base-model exact/hugging-face-base \
+  --output-dir adapters/aed-extractor \
+  --qlora
+```
+
+For an 8 GB GPU, focused article chunks and a compact base model are preferable
+to full-paper, long-context training. A larger remote GPU can train the same
+adapter export; the resulting adapter or merged GGUF can then be deployed
+locally, provided it uses the exact matching base model.

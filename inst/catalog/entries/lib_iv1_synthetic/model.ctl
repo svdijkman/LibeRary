@@ -1,0 +1,17 @@
+$PROBLEM IV bolus - 1-compartment
+$SUBROUTINES ADVAN1 TRANS1
+$INPUT AMT TIME EVID CMT MDV DV
+$DATA iv1.csv IGNORE=@
+$THETA
+ (0.01, 0.1, 1) ; K
+ (1, 10, 100) ; V
+$OMEGA
+ 0.09
+$SIGMA
+ 0.01
+$PK
+K = THETA(1) * exp(ETA(1))
+V = THETA(2)
+S1 = V
+$ERROR
+Y = F * (1 + ERR(1))
