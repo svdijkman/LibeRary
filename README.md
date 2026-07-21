@@ -311,3 +311,9 @@ applied to a different base model.
 - Generated control-stream code and defaults remain labelled suggestions.
 - Simulation, estimation, predictive checks, and any required scientific or
   regulatory qualification remain separate downstream activities.
+
+## AI-assisted development
+
+GPT-5.6 was used as an AI engineering collaborator to help implement and review
+the ingestion pipeline, evidence schemas, model-extraction workflows, GUI, tests, and documentation.
+Scientific direction, curation policy, validation criteria, and release decisions remain the responsibility of the project owner.
