@@ -1,3 +1,15 @@
+# LibeRary 0.7.2
+
+- Quarantines automated catalogue output: ingestion can publish only
+  stub/draft/review entries and cannot label machine output as validated.
+- Adds a deterministic computational qualification gate covering catalogue
+  schema, evidence presence, extraction confidence, mapping review state,
+  strict control-stream compilation, and finite residual-free simulation.
+  Promotion to validated requires both this gate and explicit human review.
+- Exposes qualification status and blockers in catalogue listings, while
+  making clear that computational qualification is not scientific or clinical
+  validation.
+
 # LibeRary 0.7.0
 
 - Replaced the default one-shot parsed-text extraction with a resumable,

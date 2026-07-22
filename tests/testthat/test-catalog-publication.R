@@ -21,15 +21,28 @@ test_that("publication is validated, versioned, and explicit about generated def
   extraction <- list(
     title = metadata$title, compound = "Testdrug", population = "Adults", route = "oral",
     n_subjects = 20, software = "NONMEM", estimation_method = "FOCEI", model_type = "pk",
-    structural_model = list(advan = 2, trans = 2, compartments = 1, description = "One compartment"),
+    structural_model = list(
+      advan = 2, trans = 2, compartments = 1, description = "One compartment",
+      implementations = list(list(
+        engine = "ADVAN", advan = 2, trans = 2, status = "reported",
+        confidence = 1, rationale = "Reported in the publication.",
+        evidence = list(status = "reported", source_locator = "fixture",
+                        evidence = "ADVAN2 TRANS2", confidence = 1),
+        alternatives = list(), review_required = FALSE
+      ))
+    ),
     parameters = list(
       theta = list(list(name = "KA", typical = 1, se = NULL, unit = "1/h"),
                    list(name = "CL", typical = 5, se = NULL, unit = "L/h"),
                    list(name = "V", typical = 50, se = NULL, unit = "L")),
-      omega = list(list(description = "IIV KA", value = 0.1),
-                   list(description = "IIV CL", value = 0.1),
-                   list(description = "IIV V", value = 0.1)),
-      sigma = list(list(description = "proportional", value = 0.05))),
+      omega = list(list(description = "IIV KA", value = 0.1,
+                        reported_metric = "variance", eta_distribution = "log_normal"),
+                   list(description = "IIV CL", value = 0.1,
+                        reported_metric = "variance", eta_distribution = "log_normal"),
+                   list(description = "IIV V", value = 0.1,
+                        reported_metric = "variance", eta_distribution = "log_normal")),
+      sigma = list(list(description = "proportional", value = 0.05,
+                        reported_metric = "variance"))),
     covariates = character(), residual_error = "Y = F * (1 + ERR(1))",
     confidence = list(overall = 0.8, fields = list(structure = 0.9, parameters = 0.8,
                                                    population = 0.8, software = 1)),
@@ -60,6 +73,10 @@ test_that("publication is validated, versioned, and explicit about generated def
   expect_equal(sum(library_list(root = cfg$catalog_dir)$library_id == second$library_id), 1L)
   expect_error(library_review(second$library_id, "validated", "Reviewer", root = cfg$catalog_dir),
                "confirm_generated")
+  gate <- library_qualification_check(second$library_id, root = cfg$catalog_dir)
+  expect_true(gate$ready)
+  expect_true(gate$compile$passed)
+  expect_true(gate$simulation$passed)
   reviewed <- library_review(second$library_id, "validated", "Reviewer", "Checked",
                              confirm_generated = TRUE, root = cfg$catalog_dir)
   expect_equal(reviewed$status, "validated")
@@ -71,6 +88,24 @@ test_that("publication is validated, versioned, and explicit about generated def
     expect_equal(imported$project, "human-project-name")
     expect_equal(imported$provenance$library_id, second$library_id)
   }
+})
+
+test_that("machine publication cannot bypass catalogue quarantine", {
+  root <- tempfile("liberary-quarantine-")
+  on.exit(unlink(root, recursive = TRUE, force = TRUE), add = TRUE)
+  cfg <- ingest_load_config()
+  cfg$data_dir <- root
+  cfg$inbox_dir <- file.path(root, "inbox")
+  cfg$cache_dir <- file.path(root, "cache")
+  cfg$catalog_dir <- file.path(root, "catalog")
+  metadata <- list(pmid = "112233", title = "Quarantine fixture",
+                   abstract = "A NONMEM model", doi = "", journal = "",
+                   year = "2026", authors = character())
+  extraction <- ingest_stub_extraction(metadata)
+  expect_error(
+    ingest_publish_catalog_entry(metadata, extraction, cfg, status = "validated"),
+    "cannot create"
+  )
 })
 
 test_that("remote LLM content is blocked unless explicitly enabled", {

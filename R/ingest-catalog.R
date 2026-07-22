@@ -419,6 +419,13 @@ ingest_publish_catalog_entry <- function(metadata, extraction, cfg = NULL, statu
   fallback <- substr(.library_text_fingerprint(paste(meta$title, meta$doi)), 1L, 12L)
   library_id <- .library_valid_id(library_id %||% paste0("pmid_", if (nzchar(meta$pmid)) meta$pmid else fallback))
   if (!status %in% LIBRARY_STATUS_LEVELS) stop("Unknown catalogue status: ", status)
+  if (status %in% c("validated", "mbma_source")) {
+    stop(
+      "Automated publication cannot create a `", status,
+      "` catalogue entry. Publish to draft/review first, then use `library_review()` ",
+      "after the qualification gate has passed.", call. = FALSE
+    )
+  }
   .library_with_lock(cfg$catalog_dir, {
     final_entry_dir <- .library_entry_dir(library_id, cfg$catalog_dir)
     old_manifest <- if (file.exists(file.path(final_entry_dir, "manifest.json")))

@@ -21,6 +21,8 @@ library_list <- function(status = NULL, root = library_catalog_root()) {
       confidence_overall = numeric(),
       assessment = character(),
       reproduction = character(),
+      qualified = logical(),
+      qualification_blockers = character(),
       updated_at = character(),
       stringsAsFactors = FALSE
     ))
@@ -40,10 +42,14 @@ library_list <- function(status = NULL, root = library_catalog_root()) {
         advan = NA_integer_,
         trans = NA_integer_, model_type = "", version = "",
         confidence_overall = NA_real_,
-        assessment = "", reproduction = "", updated_at = "",
+        assessment = "", reproduction = "", qualified = FALSE,
+        qualification_blockers = "manifest_unreadable", updated_at = "",
         stringsAsFactors = FALSE
       ))
     }
+    gate <- manifest$qualification$gate %||% list(
+      ready = FALSE, blockers = "qualification_not_run"
+    )
     data.frame(
       library_id = manifest$library_id %||% e$library_id,
       title = manifest$title %||% "",
@@ -57,6 +63,8 @@ library_list <- function(status = NULL, root = library_catalog_root()) {
       confidence_overall = as.numeric(manifest$confidence$overall %||% NA),
       assessment = as.character(manifest$qualification$automated_assessment$verdict %||% ""),
       reproduction = as.character(manifest$qualification$reproduction$status %||% "not_planned"),
+      qualified = isTRUE(gate$ready),
+      qualification_blockers = paste(as.character(gate$blockers %||% character()), collapse = "; "),
       updated_at = as.character(manifest$updated_at %||% ""),
       stringsAsFactors = FALSE
     )
@@ -67,6 +75,140 @@ library_list <- function(status = NULL, root = library_catalog_root()) {
     df <- df[df$status == status, , drop = FALSE]
   }
   df
+}
+
+.library_qualification_events <- function(model) {
+  dose_cmp <- as.integer(model$DOSECMP %||% 1L)
+  obs_cmp <- as.integer(model$OBSCMP %||% dose_cmp)
+  events <- data.frame(
+    ID = 1L, TIME = c(0, 0.5, 1, 2, 4, 8, 24),
+    EVID = c(1L, rep(0L, 6L)), AMT = c(100, rep(0, 6L)),
+    RATE = 0, II = 0, SS = 0L,
+    CMT = c(dose_cmp, rep(obs_cmp, 6L)),
+    DV = NA_real_, MDV = c(1L, rep(0L, 6L)),
+    stringsAsFactors = FALSE
+  )
+  required <- unique(as.character(model$INPUT %||% character()))
+  for (name in setdiff(required, names(events))) {
+    upper <- toupper(name)
+    events[[name]] <- if (upper %in% c("WT", "WEIGHT")) 70 else
+      if (upper %in% c("AGE")) 40 else if (upper %in% c("SEX", "MALE")) 0 else 1
+  }
+  events
+}
+
+#' Evaluate whether an extracted catalogue model is ready for validation
+#'
+#' This deterministic gate keeps machine-extracted entries quarantined until
+#' their evidence, mapping, control stream, and executable prediction path are
+#' internally consistent. Passing the gate establishes computational
+#' qualification; it is not evidence that the publication or model is correct.
+#' @param library_id Catalogue identifier.
+#' @param root Catalogue root.
+#' @param min_confidence Minimum overall extraction confidence.
+#' @param simulate Run a deterministic, residual-free simulation smoke test.
+#' @return A `library_qualification` report.
+#' @export
+library_qualification_check <- function(library_id, root = library_catalog_root(),
+                                        min_confidence = 0.8, simulate = TRUE) {
+  min_confidence <- as.numeric(min_confidence)
+  if (length(min_confidence) != 1L || !is.finite(min_confidence) ||
+      min_confidence < 0 || min_confidence > 1) {
+    stop("`min_confidence` must be one number between zero and one.", call. = FALSE)
+  }
+  entry <- library_get(library_id, root)
+  manifest <- entry$manifest
+  blockers <- character()
+  checks <- entry$validation
+  if (!isTRUE(checks$valid)) blockers <- c(blockers, "catalogue_schema_invalid")
+  confidence <- suppressWarnings(as.numeric(manifest$confidence$overall %||% NA_real_))
+  if (!is.finite(confidence) || confidence < min_confidence) {
+    blockers <- c(blockers, "confidence_below_threshold")
+  }
+  if (isTRUE(manifest$qualification$mapping_review_required)) {
+    blockers <- c(blockers, "mapping_review_required")
+  }
+  mapping_error <- as.character(manifest$model$validation_error %||% "")
+  if (length(mapping_error) && nzchar(mapping_error[[1L]])) {
+    blockers <- c(blockers, "control_stream_validation_failed")
+  }
+  parsed_path <- file.path(entry$paths$extraction, "parsed.json")
+  parsed <- if (file.exists(parsed_path)) {
+    tryCatch(jsonlite::fromJSON(parsed_path, simplifyVector = FALSE), error = function(e) NULL)
+  } else NULL
+  evidence <- c(
+    as.character(unlist(parsed$evidence_quotes %||% character(), use.names = FALSE)),
+    as.character(unlist(parsed$evidence %||% character(), use.names = FALSE))
+  )
+  ledger <- manifest$provenance$evidence_ledger %||% ""
+  ledger_path <- if (nzchar(as.character(ledger)[[1L]])) {
+    file.path(entry$paths$entry_dir, as.character(ledger)[[1L]])
+  } else ""
+  if (!any(nzchar(trimws(evidence))) && !(nzchar(ledger_path) && file.exists(ledger_path))) {
+    blockers <- c(blockers, "evidence_missing")
+  }
+  compile <- list(attempted = FALSE, passed = FALSE, error = NULL)
+  simulation <- list(attempted = FALSE, passed = FALSE, error = NULL,
+                     finite_predictions = 0L)
+  if (!requireNamespace("LibeRation", quietly = TRUE)) {
+    blockers <- c(blockers, "liberation_unavailable")
+  } else {
+    compile$attempted <- TRUE
+    control <- tryCatch(
+      LibeRation::nm_control_read(library_model(library_id, root), strict = TRUE),
+      error = identity
+    )
+    if (inherits(control, "error")) {
+      compile$error <- conditionMessage(control)
+      blockers <- c(blockers, "control_stream_compile_failed")
+    } else {
+      compile$passed <- TRUE
+      if (isTRUE(simulate)) {
+        simulation$attempted <- TRUE
+        result <- tryCatch(
+          LibeRation::nm_simulate(
+            control$model, .library_qualification_events(control$model),
+            random_effects = FALSE, residual = FALSE, seed = 1L
+          ),
+          error = identity
+        )
+        if (inherits(result, "error")) {
+          simulation$error <- conditionMessage(result)
+          blockers <- c(blockers, "simulation_smoke_test_failed")
+        } else {
+          observed <- result$EVID == 0L
+          predicted <- suppressWarnings(as.numeric(result$IPRED[observed]))
+          simulation$finite_predictions <- sum(is.finite(predicted))
+          simulation$passed <- length(predicted) > 0L && all(is.finite(predicted))
+          if (!simulation$passed) blockers <- c(blockers, "non_finite_predictions")
+        }
+      } else {
+        simulation$passed <- NA
+      }
+    }
+  }
+  blockers <- unique(blockers)
+  report <- structure(list(
+    schema_version = "1.0.0", library_id = library_id,
+    checked_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z", tz = "UTC"),
+    ready = !length(blockers), blockers = blockers,
+    criteria = list(min_confidence = min_confidence, simulate = isTRUE(simulate)),
+    confidence = confidence, compile = compile, simulation = simulation,
+    interpretation = paste(
+      "Computational qualification checks internal consistency only; it does not",
+      "independently validate the publication, estimates, or clinical suitability."
+    )
+  ), class = c("library_qualification", "list"))
+  report
+}
+
+#' @export
+print.library_qualification <- function(x, ...) {
+  cat("LibeRary computational qualification\n")
+  cat("  entry:", x$library_id, "\n")
+  cat("  ready:", if (isTRUE(x$ready)) "yes" else "no", "\n")
+  if (length(x$blockers)) cat("  blockers:", paste(x$blockers, collapse = ", "), "\n")
+  invisible(x)
 }
 
 #' Get a catalog entry
@@ -192,6 +334,15 @@ library_review <- function(library_id, status = c("review", "validated", "deprec
     if (status == "validated" && isTRUE(manifest$model$generated_suggestion) && !isTRUE(confirm_generated)) {
       stop("Set `confirm_generated=TRUE` only after reviewing every generated suggestion.")
     }
+    gate <- if (status == "validated") {
+      library_qualification_check(library_id, root = root)
+    } else NULL
+    if (status == "validated" && !isTRUE(gate$ready)) {
+      stop(
+        "The entry is not computationally qualified: ",
+        paste(gate$blockers, collapse = ", "), ".", call. = FALSE
+      )
+    }
     checks <- library_validate(library_id, root = root)
     if (!checks$valid) stop(paste(checks$errors, collapse = "; "))
     now <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z", tz = "UTC")
@@ -201,6 +352,10 @@ library_review <- function(library_id, status = c("review", "validated", "deprec
     manifest$updated_at <- now
     manifest$qualification$human_reviewed <- TRUE
     manifest$qualification$reviewer <- reviewer
+    if (!is.null(gate)) {
+      manifest$qualification$gate <- unclass(gate)
+      manifest$qualification$author_validated <- TRUE
+    }
     .library_atomic_write(manifest, file.path(.library_entry_dir(library_id, root), "manifest.json"))
     .library_rebuild_index(root)
     invisible(manifest)
