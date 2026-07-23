@@ -4,6 +4,11 @@ LibeRary is the pharmacometric model and literature repository for the LibeR
 ecosystem. It combines a curated, versioned catalogue with an autonomous,
 auditable publication-ingestion workflow:
 
+LibeRary is distributed as part of the LibeR 0.9 research beta. Use the
+[ecosystem installer](../docs/INSTALL.md) and consult
+`LibeRation::liber_support_matrix("LibeRary")`; machine-extracted records
+remain evidence-linked research candidates until reviewed.
+
 1. Search PubMed and preserve a reproducible search snapshot.
 2. Triage titles and abstracts into High, Intermediate, or Low model
    probability. High and Intermediate enter the first pass; Low is retained as

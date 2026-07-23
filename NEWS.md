@@ -1,3 +1,9 @@
+# LibeRary 0.7.5
+
+- Publishes LibeRary in the LibeR 0.9 research-beta compatibility set and
+  explicitly distinguishes verified catalogue behavior from experimental
+  machine-assisted extraction and human-curated evidence.
+
 # LibeRary 0.7.4
 
 - Restores the established high-resolution LibeR dove and visibly harmonises

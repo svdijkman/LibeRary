@@ -1,6 +1,6 @@
 Package: LibeRary
 Title: Pharmacometric Model Repository for the LibeR Ecosystem
-Version: 0.7.4
+Version: 0.7.5
 Authors@R:
     person("Sven C.", "van Dijkman", email = "svdijkman@users.noreply.github.com", role = c("aut", "cre"))
 Description: Searchable, versioned pharmacometric model repository and literature
@@ -26,8 +26,8 @@ Suggests:
     chromote,
     DT,
     knitr,
-    LibeRation (>= 0.8.1),
-    LibeRties (>= 0.7.1),
+    LibeRation (>= 0.9.0),
+    LibeRties (>= 0.7.3),
     pdftools,
     rmarkdown,
     devtools,

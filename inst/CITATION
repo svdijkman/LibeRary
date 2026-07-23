@@ -1,10 +1,9 @@
 citHeader("To cite LibeRary in publications, use:")
 
-citEntry(
-  entry = "Manual",
+bibentry(
+  bibtype = "Manual",
   title = "LibeRary: Pharmacometric Model Repository for the LibeR Ecosystem",
   author = person("Sven C.", "van Dijkman"),
   year = "2026",
-  note = "R package version 0.7.3",
-  textVersion = "van Dijkman SC (2026). LibeRary: Pharmacometric Model Repository for the LibeR Ecosystem. R package version 0.7.3."
+  note = paste("R package version", meta$Version)
 )
