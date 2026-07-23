@@ -19,7 +19,7 @@ cache_dir: ""
 fetch:
   timeout_seconds: 120
   use_chromote_fallback: false
-  user_agent: "LibeRary/0.7.0 (R; pharmacometric literature ingest)"
+  user_agent: "LibeRary/0.7.3 (R; pharmacometric literature ingest)"
 
 triage:
   enabled: true

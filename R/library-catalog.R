@@ -21,6 +21,13 @@
 #' shared or project-specific catalogue.
 #' @param create Create and seed the catalogue when it does not exist.
 #' @return Normalized directory path.
+#' @examples
+#' root <- tempfile("liberary-catalog-")
+#' old <- options(LibeRary.catalog = root)
+#' catalog <- library_catalog_root()
+#' library_search("theophylline", root = catalog)
+#' options(old)
+#' unlink(root, recursive = TRUE)
 #' @export
 library_catalog_root <- function(create = TRUE) {
   root <- getOption("LibeRary.catalog", Sys.getenv("LIBERARY_CATALOG", ""))

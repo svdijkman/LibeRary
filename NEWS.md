@@ -1,3 +1,22 @@
+# LibeRary 0.7.4
+
+- Restores the established high-resolution LibeR dove and visibly harmonises
+  the catalogue, ingestion, and reference-review shells, panels, and controls.
+- Aligns catalogue, ingestion, and reference-review headers, theme
+  persistence, package-version labels, focus indicators, and transparent forest
+  green dove assets.
+- Groups ingestion settings into collapsible connection, model, and runtime
+  sections so the working pipeline remains visible on smaller displays.
+- Makes catalogue, ingestion, and reference-review launchers consistently
+  return a Shiny application when `launch.browser = NULL`.
+
+# LibeRary 0.7.3
+
+- Adds a fail-closed reference-corpus release gate that admits only independent
+  Tier A/B evidence and never treats machine-generated silver data as gold.
+- Adds browser startup coverage and makes the catalogue GUI return a Shiny app
+  without launching a browser when requested.
+
 # LibeRary 0.7.2
 
 - Quarantines automated catalogue output: ingestion can publish only

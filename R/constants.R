@@ -45,7 +45,7 @@ DEFAULT_CONFIG <- list(
   cache_dir = "",
   fetch = list(
     timeout_seconds = 120L,
-    user_agent = "LibeRary/0.7.0 (R; pharmacometric literature ingest)",
+    user_agent = "LibeRary/0.7.3 (R; pharmacometric literature ingest)",
     use_chromote_fallback = FALSE
   ),
   triage = list(

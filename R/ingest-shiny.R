@@ -16,7 +16,9 @@ ingest_shiny <- function(host = "127.0.0.1", port = NULL, launch.browser = TRUE)
   if ((!nzchar(app_dir) || !dir.exists(app_dir)) && nzchar(root)) app_dir <- file.path(root, "inst", "shiny-ingest")
   if (!dir.exists(app_dir)) stop("The LibeRary ingestion application was not found.")
   if (nzchar(root)) Sys.setenv(LIBERARY_PKG_ROOT = root)
-  shiny::runApp(app_dir, host = host, port = port, launch.browser = launch.browser)
+  app <- shiny::shinyAppDir(app_dir)
+  if (is.null(launch.browser)) return(app)
+  shiny::runApp(app, host = host, port = port, launch.browser = launch.browser)
 }
 
 #' @rdname ingest_shiny

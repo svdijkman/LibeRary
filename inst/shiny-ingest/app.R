@@ -57,6 +57,8 @@ llm_role_control <- function(role, title, choices, selected) {
   )
 }
 
+package_version <- as.character(utils::packageVersion("LibeRary"))
+
 ui <- fluidPage(
   tags$head(
     tags$title("LibeRary"),
@@ -65,11 +67,16 @@ ui <- fluidPage(
       (function() {
         function boot() {
           try {
-            if (localStorage.getItem('liberaryIngestDarkTheme') !== '0') {
-              document.body.classList.add('theme-dark');
+            var shared = localStorage.getItem('liber.theme');
+            var legacy = localStorage.getItem('liberaryIngestDarkTheme');
+            var dark = shared === 'dark' || (shared !== 'light' && legacy === '1');
+            if (shared !== 'dark' && shared !== 'light' && legacy !== '1' && legacy !== '0') {
+              dark = matchMedia('(prefers-color-scheme: dark)').matches;
             }
+            document.documentElement.setAttribute('data-liber-theme', dark ? 'dark' : 'light');
+            if (dark) document.body.classList.add('theme-dark');
           } catch (e) {
-            document.body.classList.add('theme-dark');
+            if (matchMedia('(prefers-color-scheme: dark)').matches) document.body.classList.add('theme-dark');
           }
         }
         if (document.body) boot();
@@ -80,6 +87,7 @@ ui <- fluidPage(
     :root {
       --ingest-bg: #f4f8f5;
       --ingest-surface: #ffffff;
+      --ingest-surface-2: #f8fbf9;
       --ingest-text: #1e2b23;
       --ingest-muted: #63746a;
       --ingest-border: #d5e3da;
@@ -91,10 +99,12 @@ ui <- fluidPage(
       --ingest-accent-hover: #184e34;
       --ingest-accent-soft: #e6f1ea;
       --ingest-accent-text: #184e34;
+      --ingest-shadow: rgba(20,70,43,.10);
     }
     body.theme-dark {
       --ingest-bg: #10271e;
       --ingest-surface: #18382b;
+      --ingest-surface-2: #214936;
       --ingest-text: #f1faf5;
       --ingest-muted: #b7d0c3;
       --ingest-border: #3b6f58;
@@ -106,20 +116,31 @@ ui <- fluidPage(
       --ingest-accent-hover: #86e2b0;
       --ingest-accent-soft: #2b5e48;
       --ingest-accent-text: #d0f5e0;
+      --ingest-shadow: rgba(0,0,0,.28);
     }
     body {
       background-color: var(--ingest-bg);
       color: var(--ingest-text);
+      font: 12px/1.45 'Segoe UI', Arial, sans-serif;
       transition: background-color 0.2s, color 0.2s;
     }
+    .container-fluid { padding: 0 15px 18px; }
+    .well, .tab-content {
+      border: 1px solid var(--ingest-border);
+      border-radius: 10px;
+      box-shadow: 0 2px 7px var(--ingest-shadow);
+    }
+    .form-control, .selectize-input { min-height: 34px; border-radius: 7px; }
+    .btn { min-height: 32px; border-radius: 7px; font-size: 12px; font-weight: 650; }
     .well, .tab-content, .nav-tabs > li.active > a,
     .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
       background-color: var(--ingest-surface) !important;
       color: var(--ingest-text) !important;
       border-color: var(--ingest-border) !important;
     }
-    .nav-tabs > li > a { color: var(--ingest-muted); }
-    .nav-tabs > li.active > a { border-top: 3px solid var(--ingest-accent) !important; }
+    .nav-tabs { min-height: 42px; padding: 0 13px; background: var(--ingest-surface-2); border: 0; border-bottom: 1px solid var(--ingest-border); border-radius: 10px 10px 0 0; }
+    .nav-tabs > li > a { min-height: 42px; margin: 0; padding: 11px 15px 8px; color: var(--ingest-muted); border: 0 !important; border-bottom: 3px solid transparent !important; background: transparent !important; font-weight: 650; }
+    .nav-tabs > li.active > a { color: var(--ingest-accent); border-bottom-color: var(--ingest-accent) !important; }
     .form-control, textarea.form-control, .selectize-input {
       background-color: var(--ingest-input-bg);
       color: var(--ingest-text);
@@ -250,17 +271,34 @@ ui <- fluidPage(
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin: 0 0 18px 0;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--ingest-border);
+      min-height: 58px;
+      margin: 0 -15px 13px;
+      padding: 0 17px;
+      color: #fff;
+      background: linear-gradient(105deg, #174c32, #28744d);
+      border-bottom: 1px solid rgba(255,255,255,.15);
+      box-shadow: 0 2px 9px rgba(12,54,33,.24);
     }
     .ingest-header h2 {
       margin: 0;
-      font-size: 26px;
-      font-weight: 600;
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: .2px;
     }
-    .ingest-brand { display: flex; align-items: center; gap: 10px; }
-    .ingest-brand img { width: 34px; height: 34px; }
+    .ingest-brand { display: flex; align-items: center; gap: 11px; }
+    .ingest-brand img { width: 42px; height: 42px; filter: drop-shadow(0 2px 3px rgba(0,0,0,.2)); }
+    .ingest-brand-text { display: flex; flex-direction: column; }
+    .ingest-brand-text p { margin: 1px 0 0; font-size: 10px; opacity: .82; }
+    .ingest-header-actions { display: flex; align-items: center; gap: 12px; }
+    .ingest-version-pill {
+      padding: 3px 9px;
+      border: 1px solid rgba(255,255,255,.28);
+      border-radius: 999px;
+      color: #fff;
+      background: rgba(255,255,255,.10);
+      font-size: 9px;
+      font-weight: 700;
+    }
     .theme-toggle-wrap {
       display: flex;
       align-items: center;
@@ -269,8 +307,8 @@ ui <- fluidPage(
     }
     .theme-toggle-label {
       font-size: 12px;
-      color: var(--ingest-muted);
-      min-width: 32px;
+      color: rgba(255,255,255,.86);
+      min-width: 30px;
       text-align: right;
     }
     .theme-switch {
@@ -313,7 +351,7 @@ ui <- fluidPage(
     }
     .llm-role-block {
       border: 1px solid var(--ingest-border);
-      border-radius: 5px;
+      border-radius: 10px;
       padding: 7px 8px 8px;
       margin-bottom: 7px;
       background: var(--ingest-surface);
@@ -345,7 +383,7 @@ ui <- fluidPage(
     .modal-header, .modal-footer { border-color: var(--ingest-border); }
     .lib-detail-panel {
       border: 1px solid var(--ingest-border);
-      border-radius: 5px;
+      border-radius: 10px;
       background: var(--ingest-surface);
       padding: 12px 14px;
       min-height: 320px;
@@ -386,21 +424,63 @@ ui <- fluidPage(
     @media (max-width: 1050px) {
       .llm-role-controls { grid-template-columns: 1fr 1fr 34px; }
     }
+    .ingest-settings-group {
+      margin: 0 0 10px;
+      padding: 0 10px 8px;
+      border: 1px solid var(--ingest-border);
+      border-radius: 7px;
+      background: var(--ingest-surface);
+    }
+    .ingest-settings-group > summary {
+      margin: 0 -10px 8px;
+      padding: 9px 10px;
+      color: var(--ingest-text);
+      background: var(--ingest-surface-2);
+      border-radius: 7px;
+      cursor: pointer;
+      font-weight: 650;
+    }
+    .ingest-settings-group[open] > summary {
+      border-bottom: 1px solid var(--ingest-border);
+      border-radius: 7px 7px 0 0;
+    }
+    body button:focus-visible, body a:focus-visible, body select:focus-visible,
+    body input:focus-visible, body textarea:focus-visible, body summary:focus-visible {
+      outline: 2px solid var(--ingest-accent);
+      outline-offset: 2px;
+    }
+    .ingest-workbench-row { margin: 0 -7px; }
+    .ingest-workbench-row > div { padding: 0 7px; }
+    @media (max-width: 900px) {
+      .ingest-workbench-row > div { margin-bottom: 12px; }
+      .ingest-header h2 { font-size: 17px; }
+    }
   ")),
     tags$script(src = "ingest-gui.js")
   ),
   tags$div(
     class = "ingest-header",
-    tags$div(class = "ingest-brand", tags$img(src = "favicon.svg", alt = "LibeR"),
-             tags$h2("LibeRary - literature pipeline")),
     tags$div(
-      class = "theme-toggle-wrap",
-      tags$span(class = "theme-toggle-label", id = "theme_label", "Dark"),
-      tags$label(
-        class = "theme-switch",
-        `aria-label` = "Toggle dark theme",
-        tags$input(type = "checkbox", id = "theme_toggle", checked = NA),
-        tags$span(class = "theme-slider")
+      class = "ingest-brand",
+      tags$img(src = "favicon.svg", alt = "LibeRary"),
+      tags$div(
+        class = "ingest-brand-text",
+        tags$h2("LibeRary"),
+        tags$p("Literature discovery and model extraction")
+      )
+    ),
+    tags$div(
+      class = "ingest-header-actions",
+      tags$span(class = "ingest-version-pill", paste0("v", package_version)),
+      tags$div(
+        class = "theme-toggle-wrap",
+        tags$span(class = "theme-toggle-label", id = "theme_label", "Dark"),
+        tags$label(
+          class = "theme-switch",
+          `aria-label` = "Toggle dark theme",
+          tags$input(type = "checkbox", id = "theme_toggle", checked = NA),
+          tags$span(class = "theme-slider")
+        )
       )
     )
   ),
@@ -409,44 +489,55 @@ ui <- fluidPage(
       4,
       wellPanel(
         h4("Settings"),
-        textInput("entrez_email", "NCBI / Unpaywall email", value = default_entrez_email),
-        passwordInput(
-          "entrez_api_key",
-          "NCBI API key (optional; this session only)",
-          value = default_entrez_api_key,
-          placeholder = "Not required at 3 requests/second or less"
+        tags$details(
+          class = "ingest-settings-group", open = "open",
+          tags$summary("Connection & storage"),
+          textInput("entrez_email", "NCBI / Unpaywall email", value = default_entrez_email),
+          passwordInput(
+            "entrez_api_key",
+            "NCBI API key (optional; this session only)",
+            value = default_entrez_api_key,
+            placeholder = "Not required at 3 requests/second or less"
+          ),
+          helpText("Email and non-secret settings persist automatically. The API key is read from ENTREZ_KEY or entered for this session; it is never written to the YAML file."),
+          textInput("config_path", "Config YAML", value = default_config_path),
+          textInput("data_dir", "Persistent data directory", value = default_data_dir)
         ),
-        helpText("Email and non-secret settings persist automatically. The API key is read from ENTREZ_KEY or entered for this session; it is never written to the YAML file."),
-        textInput("config_path", "Config YAML", value = default_config_path),
-        textInput("data_dir", "Persistent data directory", value = default_data_dir),
-        llm_role_control(
+        tags$details(
+          class = "ingest-settings-group", open = "open",
+          tags$summary("Language models"),
+          llm_role_control(
           "triage", "Abstract triage",
           c("Same as indexing" = "same", provider_choices),
           default_cfg$llm$triage$provider %||% "same"
-        ),
-        llm_role_control(
+          ),
+          llm_role_control(
           "indexing", "Investigation & synthesis", provider_choices,
           default_cfg$llm$indexing$provider %||% "ollama"
-        ),
-        llm_role_control(
+          ),
+          llm_role_control(
           "vision", "PDF extraction & verification",
           c("Same as investigation" = "same", provider_choices),
           default_cfg$llm$vision$provider %||% "same"
-        ),
-        llm_role_control(
+          ),
+          llm_role_control(
           "adjudication", "Discrepancy adjudication",
           c("Same as text extraction" = "same", provider_choices),
           default_cfg$llm$adjudication$provider %||% "same"
-        ),
-        llm_role_control(
+          ),
+          llm_role_control(
           "assessment", "Skeptical evidence review",
           c("Same as indexing" = "same", provider_choices),
           default_cfg$llm$assessment$provider %||% "same"
+          ),
+          actionButton("refresh_models", "Refresh available models", class = "btn-default btn-sm"),
+          actionButton("save_settings", "Save settings", class = "btn-default btn-sm"),
+          span(class = "text-muted", style = "display:block;margin-top:6px;", "Settings are also saved automatically before each job.")
         ),
-        actionButton("refresh_models", "Refresh available models", class = "btn-default btn-sm"),
-        actionButton("save_settings", "Save settings", class = "btn-default btn-sm"),
-        span(class = "text-muted", style = "display:block;margin-top:6px;", "Settings are also saved automatically before each job."),
-        fluidRow(
+        tags$details(
+          class = "ingest-settings-group",
+          tags$summary("Runtime & extraction policy"),
+          fluidRow(
           column(6, numericInput("ollama_num_ctx", "Ollama context", value = default_cfg$ollama$num_ctx,
                                  min = 4096, max = 65536, step = 4096)),
           column(6, numericInput("ollama_num_predict", "Maximum output tokens",
@@ -502,12 +593,13 @@ ui <- fluidPage(
         hr(),
         p(class = "text-muted", "Provider status:"),
         textOutput("llm_status", inline = TRUE),
-        tags$div(
-          class = "repository-danger-zone",
-          h4("Repository maintenance"),
-          helpText("Permanently remove all catalog entries, PDFs, parsed documents, manifests, caches, triage records, and logs. Saved settings are retained."),
-          actionButton("wipe_repository_open", "Wipe repository...", icon = icon("trash"),
-                       class = "btn-danger btn-sm")
+          tags$div(
+            class = "repository-danger-zone",
+            h4("Repository maintenance"),
+            helpText("Permanently remove all catalog entries, PDFs, parsed documents, manifests, caches, triage records, and logs. Saved settings are retained."),
+            actionButton("wipe_repository_open", "Wipe repository...", icon = icon("trash"),
+                         class = "btn-danger btn-sm")
+          )
         )
       )
     ),
@@ -604,6 +696,7 @@ ui <- fluidPage(
   ),
   hr(),
   fluidRow(
+    class = "ingest-workbench-row",
     column(
       12,
       div(

@@ -84,6 +84,7 @@ if ("liberary-reference-assets" %in% names(shiny::resourcePaths())) {
 }
 shiny::addResourcePath("liberary-reference-assets", shared_www)
 favicon_href <- "liberary-reference-assets/favicon.svg"
+package_version <- as.character(utils::packageVersion("LibeRary"))
 
 .reference_empty_decisions <- function() {
   data.frame(reference_id = character(), tier = character(), training_eligible = logical(),
@@ -324,7 +325,10 @@ server <- function(input, output, session) {
   output$header_version <- renderUI({
     version <- .reference_manifest_version(corpus_root())
     if (!nzchar(version)) version <- "not loaded"
-    tags$span(class = "lr-version-pill", paste("Corpus", version))
+    tagList(
+      tags$span(class = "lr-version-pill", paste0("v", package_version)),
+      tags$span(class = "lr-version-pill", paste("Corpus", version))
+    )
   })
 
   output$model_count <- renderText({

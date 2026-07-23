@@ -608,3 +608,100 @@ library_reference_benchmark <- function(root, predictions, task = c("extraction"
   }
   result
 }
+
+#' Apply a fail-closed quality gate to a reference benchmark
+#'
+#' The gate only uses strict Tier A/B records. Silver Tier C/D results remain
+#' useful development evidence but can never satisfy this gate. This prevents
+#' an appendix-derived or otherwise incomplete reference from being presented
+#' as gold-standard release qualification.
+#'
+#' @param benchmark Result from [library_reference_benchmark()], its summary
+#'   object, or a path to `summary.json`.
+#' @param min_strict Minimum number of strict Tier A/B records.
+#' @param min_scalar_coverage,min_scalar_score Minimum scalar-field metrics.
+#' @param min_numeric_coverage,min_numeric_accuracy Minimum numeric-parameter
+#'   metrics.
+#' @param min_semantic_coverage,min_semantic_accuracy Minimum canonical semantic
+#'   metrics.
+#' @param require_complete Require a prediction for every strict record.
+#' @param error If `TRUE`, fail when any condition is not met.
+#' @return A `library_reference_gate` with individual checks and an overall
+#'   `passed` flag.
+#' @export
+library_reference_release_gate <- function(
+    benchmark, min_strict = 20L,
+    min_scalar_coverage = 0.9, min_scalar_score = 0.85,
+    min_numeric_coverage = 0.9, min_numeric_accuracy = 0.9,
+    min_semantic_coverage = 0.85, min_semantic_accuracy = 0.85,
+    require_complete = TRUE, error = FALSE) {
+  if (is.character(benchmark) && length(benchmark) == 1L) {
+    if (!file.exists(benchmark)) stop("Benchmark summary not found: ", benchmark, call. = FALSE)
+    benchmark <- jsonlite::read_json(benchmark, simplifyVector = TRUE)
+  }
+  summary <- benchmark$summary %||% benchmark
+  strict <- summary$strict
+  if (!is.list(strict)) {
+    stop("Benchmark does not contain strict Tier A/B results.", call. = FALSE)
+  }
+  scalar <- function(value) {
+    value <- suppressWarnings(as.numeric(value))
+    if (!length(value)) NA_real_ else value[[1L]]
+  }
+  thresholds <- c(
+    strict_records = as.numeric(min_strict),
+    scalar_coverage = as.numeric(min_scalar_coverage),
+    scalar_score = as.numeric(min_scalar_score),
+    numeric_coverage = as.numeric(min_numeric_coverage),
+    numeric_accuracy = as.numeric(min_numeric_accuracy),
+    semantic_coverage = as.numeric(min_semantic_coverage),
+    semantic_accuracy = as.numeric(min_semantic_accuracy)
+  )
+  observed <- c(
+    strict_records = scalar(strict$n),
+    scalar_coverage = scalar(strict$scalar_coverage),
+    scalar_score = scalar(strict$scalar_score),
+    numeric_coverage = scalar(strict$numeric_coverage),
+    numeric_accuracy = scalar(strict$numeric_accuracy),
+    semantic_coverage = scalar(strict$semantic_coverage),
+    semantic_accuracy = scalar(strict$semantic_accuracy)
+  )
+  checks <- data.frame(
+    check = names(thresholds), observed = unname(observed),
+    threshold = unname(thresholds),
+    passed = is.finite(observed) & observed >= thresholds,
+    stringsAsFactors = FALSE
+  )
+  if (isTRUE(require_complete)) {
+    complete <- scalar(strict$scored) == scalar(strict$n) &&
+      is.finite(scalar(strict$n)) && scalar(strict$n) > 0
+    checks <- rbind(checks, data.frame(
+      check = "complete_strict_predictions", observed = scalar(strict$scored),
+      threshold = scalar(strict$n), passed = complete, stringsAsFactors = FALSE
+    ))
+  }
+  result <- structure(list(
+    schema = "liberary.reference-gate/1", passed = all(checks$passed),
+    evaluated_at = .library_reference_now(), strict_only = TRUE,
+    checks = checks,
+    interpretation = paste(
+      "Only independently verified Tier A/B records qualify.",
+      "Tier C/D results cannot pass this release gate."
+    )
+  ), class = "library_reference_gate")
+  if (isTRUE(error) && !result$passed) {
+    failed <- checks$check[!checks$passed]
+    stop("LibeRary strict reference gate failed: ", paste(failed, collapse = ", "), call. = FALSE)
+  }
+  result
+}
+
+#' @export
+print.library_reference_gate <- function(x, ...) {
+  cat("LibeRary strict reference gate:", if (isTRUE(x$passed)) "PASS" else "FAIL", "\n")
+  failed <- x$checks[!x$checks$passed, , drop = FALSE]
+  if (nrow(failed)) {
+    cat("  unmet:", paste(failed$check, collapse = ", "), "\n")
+  }
+  invisible(x)
+}

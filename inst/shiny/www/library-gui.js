@@ -3,10 +3,14 @@
 
   function isDarkPreferred() {
     try {
-      return localStorage.getItem(STORAGE_KEY) !== "0";
+      var shared = localStorage.getItem("liber.theme");
+      if (shared === "dark" || shared === "light") return shared === "dark";
+      var legacy = localStorage.getItem(STORAGE_KEY);
+      if (legacy === "1" || legacy === "0") return legacy === "1";
     } catch (e) {
-      return true;
+      return !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
     }
+    return !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
   }
 
   function applyTheme(dark) {
@@ -24,7 +28,9 @@
       toggle.checked = !!dark;
     }
     try {
+      localStorage.setItem("liber.theme", dark ? "dark" : "light");
       localStorage.setItem(STORAGE_KEY, dark ? "1" : "0");
+      document.documentElement.setAttribute("data-liber-theme", dark ? "dark" : "light");
     } catch (e) {}
   }
 

@@ -18,3 +18,11 @@ survives upgrades and reinstalls. Packaged validated examples are seeded on
 first use. \code{options(LibeRary.catalog=)} or \code{LIBERARY_CATALOG} can select a
 shared or project-specific catalogue.
 }
+\examples{
+root <- tempfile("liberary-catalog-")
+old <- options(LibeRary.catalog = root)
+catalog <- library_catalog_root()
+library_search("theophylline", root = catalog)
+options(old)
+unlink(root, recursive = TRUE)
+}

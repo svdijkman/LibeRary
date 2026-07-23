@@ -20,7 +20,7 @@ ingest_unpaywall_lookup <- function(doi, cfg, use_cache = TRUE) {
   req <- httr2::request("https://api.unpaywall.org/v2/") |>
     httr2::req_url_path_append(doi) |>
     httr2::req_url_query(email = cfg$unpaywall$email) |>
-    httr2::req_user_agent(cfg$fetch$user_agent %||% "LibeRary/0.7.0") |>
+    httr2::req_user_agent(cfg$fetch$user_agent %||% "LibeRary/0.7.3") |>
     httr2::req_timeout(cfg$fetch$timeout_seconds %||% 120L)
 
   resp <- tryCatch(httr2::req_perform(req), error = function(e) NULL)
@@ -57,7 +57,7 @@ ingest_pmc_oa_lookup <- function(pmcid, cfg) {
   ingest_throttle("entrez", ingest_entrez_interval(cfg))
   req <- httr2::request("https://www.ncbi.nlm.nih.gov/pmc/utils/oa/oa.fcgi") |>
     httr2::req_url_query(id = paste0("PMC", pmcid)) |>
-    httr2::req_user_agent(cfg$fetch$user_agent %||% "LibeRary/0.7.0") |>
+    httr2::req_user_agent(cfg$fetch$user_agent %||% "LibeRary/0.7.3") |>
     httr2::req_timeout(cfg$fetch$timeout_seconds %||% 120L)
   resp <- tryCatch(httr2::req_perform(req), error = function(e) NULL)
   if (is.null(resp) || httr2::resp_status(resp) >= 400L) {
@@ -111,7 +111,7 @@ ingest_europe_pmc_lookup <- function(pmid = "", doi = "", cfg) {
       pageSize = 1L,
       resultType = "core"
     ) |>
-    httr2::req_user_agent(cfg$fetch$user_agent %||% "LibeRary/0.7.0") |>
+    httr2::req_user_agent(cfg$fetch$user_agent %||% "LibeRary/0.7.3") |>
     httr2::req_timeout(cfg$fetch$timeout_seconds %||% 120L)
 
   resp <- tryCatch(httr2::req_perform(req), error = function(e) NULL)
@@ -167,7 +167,7 @@ ingest_download_pdf <- function(pmid, url, cfg, dest_name = "article.pdf") {
   }
 
   req <- httr2::request(url) |>
-    httr2::req_user_agent(cfg$fetch$user_agent %||% "LibeRary/0.7.0") |>
+    httr2::req_user_agent(cfg$fetch$user_agent %||% "LibeRary/0.7.3") |>
     httr2::req_timeout(cfg$fetch$timeout_seconds %||% 120L) |>
     httr2::req_headers(Accept = "application/pdf,*/*")
 
