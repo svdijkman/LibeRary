@@ -1,3 +1,10 @@
+# LibeRary 0.7.6
+
+- Centralizes Ingest progress-file polling, emits updates only when state
+  changes, and retains a responsive non-fading interface during long batches.
+- Applies the shared busy-state behavior to the catalogue, Ingest, and
+  reference-review GUIs.
+
 # LibeRary 0.7.5
 
 - Publishes LibeRary in the LibeR 0.9 research-beta compatibility set and
