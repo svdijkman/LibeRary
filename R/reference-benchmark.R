@@ -294,13 +294,13 @@
 }
 
 .library_reference_write_csv <- function(value, path) {
-  dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
-  temporary <- tempfile("liberary-reference-", tmpdir = dirname(path), fileext = ".csv")
-  on.exit(unlink(temporary, force = TRUE), add = TRUE)
-  utils::write.csv(value, temporary, row.names = FALSE, na = "")
-  if (file.exists(path)) unlink(path, force = TRUE)
-  if (!file.rename(temporary, path)) stop("Unable to publish ", path, call. = FALSE)
-  invisible(path)
+  .liber_shared_atomic_publish(
+    path,
+    writer = function(temporary) {
+      utils::write.csv(value, temporary, row.names = FALSE, na = "")
+    },
+    prefix = "liberary-reference-", fileext = ".csv"
+  )
 }
 
 .library_reference_prediction_reusable <- function(path, task, mode, endpoint_configuration) {

@@ -9,24 +9,14 @@
   }
 
   function boot() {
-    var dark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    try {
-      var shared = localStorage.getItem('liber.theme');
-      if (shared === 'dark' || shared === 'light') dark = shared === 'dark';
-      else {
-        var legacy = localStorage.getItem('libeRaryDarkTheme');
-        if (legacy === '1' || legacy === '0') dark = legacy === '1';
-      }
-    } catch (e) {}
+    var dark = window.LibeRDesign.theme.initialDark('libeRaryDarkTheme');
     applyTheme(dark);
     document.addEventListener('change', function (event) {
       if (event.target && event.target.id === 'theme_toggle') {
         applyTheme(event.target.checked);
-        try {
-          localStorage.setItem('liber.theme', event.target.checked ? 'dark' : 'light');
-          localStorage.setItem('libeRaryDarkTheme', event.target.checked ? '1' : '0');
-          document.documentElement.setAttribute('data-liber-theme', event.target.checked ? 'dark' : 'light');
-        } catch (e) {}
+        window.LibeRDesign.theme.store(
+          event.target.checked, 'libeRaryDarkTheme', true
+        );
       }
     });
   }

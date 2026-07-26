@@ -86,17 +86,13 @@ ui <- fluidPage(
   tags$head(
     tags$title("LibeRary"),
     tags$link(rel = "icon", type = "image/svg+xml", href = "favicon.svg"),
+    tags$link(rel = "stylesheet", type = "text/css", href = "liber-design-system.css"),
+    tags$script(src = "liber-design-system.js"),
     tags$script(HTML("
       (function() {
         function boot() {
           try {
-            var shared = localStorage.getItem('liber.theme');
-            var legacy = localStorage.getItem('libeRaryDarkTheme');
-            var dark = shared === 'dark' || (shared !== 'light' && legacy === '1');
-            if (shared !== 'dark' && shared !== 'light' && legacy !== '1' && legacy !== '0') {
-              dark = matchMedia('(prefers-color-scheme: dark)').matches;
-            }
-            document.documentElement.setAttribute('data-liber-theme', dark ? 'dark' : 'light');
+            var dark = window.LibeRDesign.theme.bootstrap('libeRaryDarkTheme', true);
             if (dark) document.body.classList.add('theme-dark');
           } catch (e) {
             if (matchMedia('(prefers-color-scheme: dark)').matches) document.body.classList.add('theme-dark');

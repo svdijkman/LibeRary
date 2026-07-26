@@ -141,7 +141,9 @@ ui <- fluidPage(
   tags$head(
     tags$title("LibeRary"),
     tags$link(rel = "icon", type = "image/svg+xml", href = favicon_href),
+    tags$link(rel = "stylesheet", type = "text/css", href = "liber-design-system.css"),
     tags$link(rel = "stylesheet", type = "text/css", href = "reference.css"),
+    tags$script(src = "liber-design-system.js"),
     tags$script(src = "reference.js")
   ),
   tags$div(

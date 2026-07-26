@@ -201,21 +201,10 @@ library_save_config <- function(cfg, path = library_config_path(create = TRUE)) 
   if (!requireNamespace("yaml", quietly = TRUE)) stop("Install 'yaml' to save LibeRary configuration.")
   cfg <- ingest_validate_config(cfg)
   cfg$entrez$api_key <- ""
-  directory <- dirname(path)
-  if (!dir.exists(directory)) dir.create(directory, recursive = TRUE, showWarnings = FALSE)
-  temporary <- tempfile("config-", tmpdir = directory, fileext = ".yml")
-  on.exit(unlink(temporary, force = TRUE), add = TRUE)
-  yaml::write_yaml(cfg, temporary)
-  if (file.exists(path)) {
-    previous <- paste0(path, ".previous"); unlink(previous, force = TRUE)
-    if (!file.rename(path, previous)) stop("Unable to rotate LibeRary configuration.")
-  }
-  if (!file.rename(temporary, path)) {
-    if (file.exists(paste0(path, ".previous"))) file.rename(paste0(path, ".previous"), path)
-    stop("Unable to save LibeRary configuration.")
-  }
-  unlink(paste0(path, ".previous"), force = TRUE)
-  if (.Platform$OS.type != "windows") Sys.chmod(path, "0600")
+  .liber_shared_atomic_publish(
+    path, writer = function(temporary) yaml::write_yaml(cfg, temporary),
+    prefix = "config-", fileext = ".yml"
+  )
   invisible(normalizePath(path, winslash = "/", mustWork = TRUE))
 }
 
@@ -228,15 +217,9 @@ library_save_config <- function(cfg, path = library_config_path(create = TRUE)) 
 #' @return Normalized directory path.
 #' @export
 library_home <- function(create = FALSE) {
-  root <- Sys.getenv("LIBERARY_HOME", "")
-  if (!nzchar(root)) {
-    root <- if (.Platform$OS.type == "windows") {
-      file.path(Sys.getenv("USERPROFILE", path.expand("~")), "Documents", "LibeR", "library")
-    } else file.path(path.expand("~"), "LibeR", "library")
-  }
-  root <- path.expand(root)
-  if (isTRUE(create) && !dir.exists(root)) dir.create(root, recursive = TRUE, showWarnings = FALSE)
-  normalizePath(root, winslash = "/", mustWork = FALSE)
+  .liber_shared_user_root(
+    "library", envvar = "LIBERARY_HOME", create = create, normalize = TRUE
+  )
 }
 
 `%||%` <- function(x, y) {

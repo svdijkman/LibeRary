@@ -63,17 +63,13 @@ ui <- fluidPage(
   tags$head(
     tags$title("LibeRary"),
     tags$link(rel = "icon", type = "image/svg+xml", href = "favicon.svg"),
+    tags$link(rel = "stylesheet", type = "text/css", href = "liber-design-system.css"),
+    tags$script(src = "liber-design-system.js"),
     tags$script(HTML("
       (function() {
         function boot() {
           try {
-            var shared = localStorage.getItem('liber.theme');
-            var legacy = localStorage.getItem('liberaryIngestDarkTheme');
-            var dark = shared === 'dark' || (shared !== 'light' && legacy === '1');
-            if (shared !== 'dark' && shared !== 'light' && legacy !== '1' && legacy !== '0') {
-              dark = matchMedia('(prefers-color-scheme: dark)').matches;
-            }
-            document.documentElement.setAttribute('data-liber-theme', dark ? 'dark' : 'light');
+            var dark = window.LibeRDesign.theme.bootstrap('liberaryIngestDarkTheme', true);
             if (dark) document.body.classList.add('theme-dark');
           } catch (e) {
             if (matchMedia('(prefers-color-scheme: dark)').matches) document.body.classList.add('theme-dark');
@@ -735,15 +731,10 @@ server <- function(input, output, session) {
   discover_df <- reactiveVal(NULL)
   pubmed_count_val <- reactiveVal(NA_integer_)
   last_completion_key <- reactiveVal("")
-  progress_rev <- reactiveVal(0L)
+  progress_state <- reactiveVal(NULL)
   catalog_rev <- reactiveVal(0L)
   selected_catalog_id <- reactiveVal("")
   selected_catalog_pdf_url <- reactiveVal("")
-  bump_progress <- function() {
-    # Keep the polling observer from becoming dependent on the value it bumps.
-    # Without isolate(), every completed poll immediately invalidates itself.
-    progress_rev(isolate(progress_rev()) + 1L)
-  }
   triage_models <- reactiveVal(character())
   indexing_models <- reactiveVal(character())
   vision_models <- reactiveVal(character())
@@ -1039,6 +1030,12 @@ server <- function(input, output, session) {
     session$sendCustomMessage("setProgress", list(
       scope = "current", value = 0, message = "Waiting for a new job", status = "idle"
     ))
+    progress_state(list(
+      status = "idle",
+      message = "Repository is empty",
+      batch = list(value = 0, message = "Repository is empty", status = "idle"),
+      current = list(value = 0, message = "Waiting for a new job", status = "idle")
+    ))
     removeModal()
     showNotification(
       paste("Repository wiped successfully;", result$removed, "filesystem entries removed."),
@@ -1151,8 +1148,12 @@ server <- function(input, output, session) {
     }
   }
 
-  send_progress_state <- function(prog) {
+  send_progress_state <- function(prog, force = FALSE) {
     if (is.null(prog)) return(invisible(NULL))
+    if (!isTRUE(force) && identical(shiny::isolate(progress_state()), prog)) {
+      return(invisible(FALSE))
+    }
+    progress_state(prog)
     batch <- prog$batch %||% prog
     session$sendCustomMessage("setProgress", list(
       scope = "batch",
@@ -1169,14 +1170,13 @@ server <- function(input, output, session) {
         status = current$status %||% "idle"
       ))
     }
-    invisible(NULL)
+    invisible(TRUE)
   }
 
   sync_job_ui <- function(paths) {
     prog <- ingest_read_progress(paths$progress)
     log_lines <- flush_job_output(paths)
     send_progress_state(prog)
-    bump_progress()
     handle_job_completion(prog, log_lines)
     invisible(prog)
   }
@@ -1213,7 +1213,7 @@ server <- function(input, output, session) {
       job_supervisor(NULL)
       log_lines <- flush_job_output(paths)
       handle_job_completion(current, log_lines)
-      bump_progress()
+      send_progress_state(current)
       return(invisible(TRUE))
     }
     result <- tryCatch(sup$get_result(), error = identity)
@@ -1236,7 +1236,7 @@ server <- function(input, output, session) {
     refreshed <- ingest_read_progress(paths$progress)
     log_lines <- flush_job_output(paths)
     handle_job_completion(refreshed, log_lines)
-    bump_progress()
+    send_progress_state(refreshed)
     invisible(TRUE)
   }
 
@@ -1270,11 +1270,7 @@ server <- function(input, output, session) {
       file = paths$log
     )
     ingest_write_progress(paths$progress, 0, "Starting...", status = "running")
-    session$sendCustomMessage("setProgress", list(scope = "batch", value = 2,
-                                                    message = "Starting...", status = "running"))
-    session$sendCustomMessage("setProgress", list(scope = "current", value = 0,
-                                                    message = "Waiting for the first PMID", status = "idle"))
-    bump_progress()
+    send_progress_state(ingest_read_progress(paths$progress), force = TRUE)
     log_path(paths$log)
     progress_path(paths$progress)
     last_log_lines(0L)
@@ -1293,7 +1289,6 @@ server <- function(input, output, session) {
             file = paths$log,
             append = TRUE
           )
-          bump_progress()
           showNotification(conditionMessage(e), type = "error", duration = 10)
         }
       )
@@ -1318,10 +1313,14 @@ server <- function(input, output, session) {
         ingest_write_progress(paths$progress, 0, message, status = "error")
         cat(sprintf("[%s] ERROR: %s\n", format(Sys.time(), "%H:%M:%S"), message),
             file = paths$log, append = TRUE)
-        bump_progress()
         showNotification(message, type = "error", duration = 12)
         sync_job_ui(paths)
         return(invisible(NULL))
+      }
+      if (requireNamespace("LibeRties", quietly = TRUE)) {
+        bg <- LibeRties::ls_supervise_process(
+          bg, label = paste("LibeRary", job, "GUI job")
+        )
       }
       job_supervisor(bg)
     } else {
@@ -1404,7 +1403,6 @@ server <- function(input, output, session) {
     send_progress_state(refreshed)
     log_lines <- flush_job_output(paths)
     handle_job_completion(refreshed, log_lines)
-    bump_progress()
     showNotification("The current ingestion job was stopped.", type = "message", duration = 5)
   }, ignoreInit = TRUE)
 
@@ -1429,7 +1427,6 @@ server <- function(input, output, session) {
     prog <- if (nzchar(prog_path)) ingest_read_progress(prog_path) else NULL
     if (!is.null(prog)) {
       send_progress_state(prog)
-      bump_progress()
       sup <- job_supervisor()
       if (!is.null(sup) && !sup$is_alive()) {
         finalize_background_worker(list(log = path, progress = prog_path), prog, log_lines)
@@ -1440,26 +1437,23 @@ server <- function(input, output, session) {
   })
 
   output$progress_message <- renderText({
-    poll()
-    prog <- ingest_read_progress(gui_paths()$progress)
+    prog <- progress_state()
     if (is.null(prog)) return("")
     (prog$batch %||% prog)$message %||% ""
   })
 
   output$current_progress_message <- renderText({
-    poll()
-    prog <- ingest_read_progress(gui_paths()$progress)
+    prog <- progress_state()
     if (is.null(prog$current)) return("Waiting for an article stage")
     prog$current$message %||% ""
   })
 
   output$pubmed_count <- renderText({
-    poll()
     n <- pubmed_count_val()
     if (!is.na(n)) {
       return(paste0(format(n, big.mark = ","), " total hits"))
     }
-    prog <- ingest_read_progress(gui_paths()$progress)
+    prog <- progress_state()
     if (!is.null(prog) && identical(prog$status, "running") && grepl("^Count:", prog$message %||% "")) {
       return(sub("^Count:\\s*", "", prog$message))
     }
@@ -1474,8 +1468,7 @@ server <- function(input, output, session) {
   })
 
   output$job_status_ui <- renderUI({
-    progress_rev()
-    prog <- ingest_read_progress(gui_paths()$progress)
+    prog <- progress_state()
     st <- prog$status %||% "idle"
     col <- switch(st, running = "#65d39b", done = "#65d39b", cancelled = "#e4b45f",
                   error = "#e27483", "#8fa89b")
@@ -1483,7 +1476,6 @@ server <- function(input, output, session) {
   })
 
   output$stop_job_ui <- renderUI({
-    progress_rev()
     sup <- job_supervisor()
     running <- !is.null(sup) && tryCatch(sup$is_alive(), error = function(e) FALSE)
     actionButton(

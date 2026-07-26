@@ -2,15 +2,7 @@
 var INGEST_THEME_KEY = "liberaryIngestDarkTheme";
 
 function ingestDarkPreferred() {
-  try {
-    var shared = localStorage.getItem("liber.theme");
-    if (shared === "dark" || shared === "light") return shared === "dark";
-    var legacy = localStorage.getItem(INGEST_THEME_KEY);
-    if (legacy === "1" || legacy === "0") return legacy === "1";
-  } catch (e) {
-    return !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
-  }
-  return !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  return window.LibeRDesign.theme.initialDark(INGEST_THEME_KEY);
 }
 
 function applyTheme(dark) {
@@ -23,11 +15,7 @@ function applyTheme(dark) {
   var toggle = document.getElementById("theme_toggle");
   if (label) label.textContent = dark ? "Dark" : "Light";
   if (toggle) toggle.checked = !!dark;
-  try {
-    localStorage.setItem("liber.theme", dark ? "dark" : "light");
-    localStorage.setItem(INGEST_THEME_KEY, dark ? "1" : "0");
-    document.documentElement.setAttribute("data-liber-theme", dark ? "dark" : "light");
-  } catch (e) {}
+  window.LibeRDesign.theme.store(dark, INGEST_THEME_KEY, true);
 }
 
 function initThemeToggle() {

@@ -19,10 +19,22 @@ test_that("catalogue GUIs retain shared theme, version labels, and compact setti
   reference_js <- paste(readLines(
     file.path(package_root, "shiny-reference", "www", "reference.js"), warn = FALSE
   ), collapse = "\n")
+  design <- paste(readLines(
+    file.path(package_root, "shiny", "www", "liber-design-system.js"),
+    warn = FALSE
+  ), collapse = "\n")
+  design_css <- paste(readLines(
+    file.path(package_root, "shiny", "www", "liber-design-system.css"),
+    warn = FALSE
+  ), collapse = "\n")
 
-  expect_match(catalog_js, 'localStorage\\.getItem\\("liber\\.theme"\\)')
-  expect_match(ingest_js, 'localStorage\\.getItem\\("liber\\.theme"\\)')
-  expect_match(reference_js, "localStorage.getItem('liber.theme')", fixed = TRUE)
+  expect_match(design, 'localStorage\\.getItem\\("liber\\.theme"\\)')
+  expect_match(catalog_js, "LibeRDesign.theme", fixed = TRUE)
+  expect_match(ingest_js, "LibeRDesign.theme", fixed = TRUE)
+  expect_match(reference_js, "LibeRDesign.theme", fixed = TRUE)
+  expect_match(design_css, ".shiny-bound-output.recalculating", fixed = TRUE)
+  expect_match(ingest_app, "progress_state <- reactiveVal", fixed = TRUE)
+  expect_match(ingest_app, "identical(shiny::isolate(progress_state()), prog)", fixed = TRUE)
   expect_match(ingest_app, "ingest-version-pill", fixed = TRUE)
   expect_match(ingest_app, "ingest-settings-group", fixed = TRUE)
   expect_match(catalog_app, "min-height: 58px", fixed = TRUE)

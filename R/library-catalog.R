@@ -108,54 +108,36 @@ library_catalog_root <- function(create = TRUE) {
 }
 
 .library_atomic_write <- function(value, path, auto_unbox = TRUE) {
-  dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
-  temporary <- tempfile("liberary-", tmpdir = dirname(path), fileext = ".json")
-  on.exit(unlink(temporary, force = TRUE), add = TRUE)
-  jsonlite::write_json(value, temporary, auto_unbox = auto_unbox, pretty = TRUE,
-                       null = "null", digits = NA)
-  previous <- paste0(path, ".previous")
-  if (file.exists(path)) {
-    unlink(previous, force = TRUE)
-    if (!file.rename(path, previous)) stop("Unable to rotate ", path)
-  }
-  if (!file.rename(temporary, path)) {
-    if (file.exists(previous)) file.rename(previous, path)
-    stop("Unable to publish ", path)
-  }
-  unlink(previous, force = TRUE)
-  if (.Platform$OS.type != "windows") Sys.chmod(path, "0600")
-  invisible(path)
+  .liber_shared_atomic_publish(
+    path,
+    writer = function(temporary) {
+      jsonlite::write_json(
+        value, temporary, auto_unbox = auto_unbox, pretty = TRUE,
+        null = "null", digits = NA
+      )
+    },
+    prefix = "liberary-", fileext = ".json"
+  )
 }
 
 .library_atomic_write_lines <- function(value, path) {
-  dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
-  temporary <- tempfile("liberary-", tmpdir = dirname(path))
-  on.exit(unlink(temporary, force = TRUE), add = TRUE)
-  writeLines(enc2utf8(as.character(value)), temporary, useBytes = TRUE)
-  previous <- paste0(path, ".previous")
-  if (file.exists(path)) {
-    unlink(previous, force = TRUE)
-    if (!file.rename(path, previous)) stop("Unable to rotate ", path)
-  }
-  if (!file.rename(temporary, path)) {
-    if (file.exists(previous)) file.rename(previous, path)
-    stop("Unable to publish ", path)
-  }
-  unlink(previous, force = TRUE)
-  invisible(path)
+  .liber_shared_atomic_publish(
+    path,
+    writer = function(temporary) {
+      writeLines(enc2utf8(as.character(value)), temporary, useBytes = TRUE)
+    },
+    prefix = "liberary-", mode = NULL
+  )
 }
 
 .library_with_lock <- function(root, code, timeout = 10) {
   lock <- file.path(root, ".catalog.lock")
-  deadline <- Sys.time() + timeout
-  acquired <- FALSE
-  while (!acquired && Sys.time() < deadline) {
-    acquired <- dir.create(lock, showWarnings = FALSE)
-    if (!acquired) Sys.sleep(0.05)
-  }
-  if (!acquired) stop("The LibeRary catalogue is busy; try again shortly.")
-  on.exit(unlink(lock, recursive = TRUE, force = TRUE), add = TRUE)
-  force(code)
+  .liber_shared_with_lock(
+    lock, function() force(code), timeout = timeout, poll = 0.05,
+    error = function(message) {
+      stop("The LibeRary catalogue is busy; try again shortly.", call. = FALSE)
+    }
+  )
 }
 
 .library_rebuild_index <- function(root = library_catalog_root()) {

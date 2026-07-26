@@ -2,15 +2,7 @@
   var STORAGE_KEY = "libeRaryDarkTheme";
 
   function isDarkPreferred() {
-    try {
-      var shared = localStorage.getItem("liber.theme");
-      if (shared === "dark" || shared === "light") return shared === "dark";
-      var legacy = localStorage.getItem(STORAGE_KEY);
-      if (legacy === "1" || legacy === "0") return legacy === "1";
-    } catch (e) {
-      return !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
-    }
-    return !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    return window.LibeRDesign.theme.initialDark(STORAGE_KEY);
   }
 
   function applyTheme(dark) {
@@ -27,11 +19,7 @@
     if (toggle) {
       toggle.checked = !!dark;
     }
-    try {
-      localStorage.setItem("liber.theme", dark ? "dark" : "light");
-      localStorage.setItem(STORAGE_KEY, dark ? "1" : "0");
-      document.documentElement.setAttribute("data-liber-theme", dark ? "dark" : "light");
-    } catch (e) {}
+    window.LibeRDesign.theme.store(dark, STORAGE_KEY, true);
   }
 
   function initThemeToggle() {
