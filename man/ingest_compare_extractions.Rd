@@ -14,7 +14,8 @@ ingest_compare_extractions(text, vision, tolerance = 0.02)
 \item{tolerance}{Relative tolerance for numeric claims.}
 }
 \value{
-Reconciliation report.
+A versioned \code{library_model_comparison} reconciliation object with
+source fingerprints, normalized claims, and field-level differences.
 }
 \description{
 Compare text- and vision-lane model claims field by field

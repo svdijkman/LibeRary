@@ -37,6 +37,10 @@ Every LLM role is selectable: abstract triage, investigation/synthesis, PDF
 vision verification, skeptical evidence review, and adjudication. Audits retain provider, exact
 model, prompt/schema version, content hashes, token usage, timing, evidence
 locators, reconciliation, and adjudication decisions.
+Text/vision reconciliation is retained as a versioned
+`library_model_comparison` object with a content fingerprint, compared fields,
+agreement, and major/minor discrepancies. The adjudicator consumes this object
+directly, so a disagreement is durable evidence rather than a transient prompt.
 
 `machine_consistent` and `machine_adjudicated` are machine qualification
 states—not claims of human validation. Human attention is reserved for

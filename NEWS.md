@@ -1,3 +1,9 @@
+# LibeRary 0.7.7
+
+- Promotes text-lane and vision-lane reconciliation to a versioned,
+  fingerprinted `library_model_comparison` evidence object while retaining
+  compatibility with the adjudication pipeline.
+
 # LibeRary 0.7.6
 
 - Centralizes Ingest progress-file polling, emits updates only when state

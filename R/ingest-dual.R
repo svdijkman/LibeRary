@@ -305,12 +305,30 @@ ingest_extract_vision_lane <- function(metadata, bundle, cfg = NULL) {
 #' @param text Text-lane result.
 #' @param vision Vision-lane result.
 #' @param tolerance Relative tolerance for numeric claims.
-#' @return Reconciliation report.
+#' @return A versioned `library_model_comparison` reconciliation object with
+#'   source fingerprints, normalized claims, and field-level differences.
 #' @export
 ingest_compare_extractions <- function(text, vision, tolerance = 0.02) {
+  source_fingerprints <- c(
+    text = digest::digest(text, algo = "sha256", serialize = TRUE),
+    vision = digest::digest(vision, algo = "sha256", serialize = TRUE)
+  )
   if (!isTRUE(text$available) || !isTRUE(vision$available)) {
-    return(list(comparable = FALSE, consistent = FALSE, agreement = 0,
-                differences = list(), missing_lanes = c(if (!isTRUE(text$available)) "text", if (!isTRUE(vision$available)) "vision")))
+    return(structure(list(
+      schema = "liberary.model-comparison", version = 1L,
+      id = digest::digest(
+        list(source_fingerprints, tolerance), algo = "sha256",
+        serialize = TRUE
+      ),
+      created_utc = format(Sys.time(), tz = "UTC", usetz = TRUE),
+      sources = c("text", "vision"),
+      source_fingerprints = source_fingerprints,
+      comparable = FALSE, consistent = FALSE, agreement = 0,
+      differences = list(),
+      missing_lanes = c(if (!isTRUE(text$available)) "text",
+                        if (!isTRUE(vision$available)) "vision"),
+      tolerance = tolerance
+    ), class = "library_model_comparison"))
   }
   a <- .library_extraction_claims(text); b <- .library_extraction_claims(vision)
   fields <- sort(unique(c(names(a), names(b))))
@@ -323,9 +341,35 @@ ingest_compare_extractions <- function(text, vision, tolerance = 0.02) {
   denominator <- max(1L, sum(present))
   agreement <- sum(equal & present) / denominator
   major <- sum(vapply(differences, function(x) identical(x$impact, "major"), logical(1)))
-  list(comparable = TRUE, consistent = !length(differences), agreement = agreement,
-       compared_fields = sum(present), difference_count = length(differences),
-       major_difference_count = major, differences = differences)
+  structure(list(
+    schema = "liberary.model-comparison", version = 1L,
+    id = digest::digest(
+      list(source_fingerprints, a, b, tolerance), algo = "sha256",
+      serialize = TRUE
+    ),
+    created_utc = format(Sys.time(), tz = "UTC", usetz = TRUE),
+    sources = c("text", "vision"),
+    source_fingerprints = source_fingerprints,
+    claims = list(text = a, vision = b),
+    comparable = TRUE, consistent = !length(differences),
+    agreement = agreement, compared_fields = sum(present),
+    difference_count = length(differences),
+    major_difference_count = major, differences = differences,
+    tolerance = tolerance
+  ), class = "library_model_comparison")
+}
+
+#' @export
+print.library_model_comparison <- function(x, ...) {
+  cat("LibeRary reproducible model comparison\n")
+  cat("  id:", substr(x$id, 1L, 12L),
+      " comparable:", x$comparable,
+      " agreement:", format(100 * x$agreement, digits = 4), "%\n")
+  if (isTRUE(x$comparable)) {
+    cat("  differences:", x$difference_count,
+        " major:", x$major_difference_count, "\n")
+  }
+  invisible(x)
 }
 
 .library_lane_confidence <- function(lane) {
