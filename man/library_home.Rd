@@ -13,7 +13,8 @@ library_home(create = FALSE)
 Normalized directory path.
 }
 \description{
-Defaults to \code{Documents/LibeR/library} on Windows and \verb{~/LibeR/library} on
-Linux/macOS, alongside the default LibeRation workspace. Set
-\code{LIBERARY_HOME} to override it.
+Defaults to \code{Documents/LibeR-data/library} on Windows and
+\verb{~/LibeR-data/library} on Linux/macOS. Existing installations continue to
+use a legacy \code{LibeR/library} directory when it exists and the new location
+does not. Set \code{LIBERARY_HOME} to override either default.
 }

@@ -210,16 +210,29 @@ library_save_config <- function(cfg, path = library_config_path(create = TRUE)) 
 
 #' Persistent LibeRary home
 #'
-#' Defaults to `Documents/LibeR/library` on Windows and `~/LibeR/library` on
-#' Linux/macOS, alongside the default LibeRation workspace. Set
-#' `LIBERARY_HOME` to override it.
+#' Defaults to `Documents/LibeR-data/library` on Windows and
+#' `~/LibeR-data/library` on Linux/macOS. Existing installations continue to
+#' use a legacy `LibeR/library` directory when it exists and the new location
+#' does not. Set `LIBERARY_HOME` to override either default.
 #' @param create Create the directory.
 #' @return Normalized directory path.
 #' @export
 library_home <- function(create = FALSE) {
-  .liber_shared_user_root(
-    "library", envvar = "LIBERARY_HOME", create = create, normalize = TRUE
+  configured <- Sys.getenv("LIBERARY_HOME", unset = "")
+  path <- .liber_shared_user_root(
+    "library", envvar = "LIBERARY_HOME", create = FALSE, normalize = FALSE,
+    root_name = "LibeR-data"
   )
+  if (!nzchar(configured) && !dir.exists(path)) {
+    legacy <- .liber_shared_user_root(
+      "library", create = FALSE, normalize = FALSE, root_name = "LibeR"
+    )
+    if (dir.exists(legacy)) path <- legacy
+  }
+  if (isTRUE(create) && !dir.exists(path)) {
+    dir.create(path, recursive = TRUE, showWarnings = FALSE)
+  }
+  normalizePath(path, winslash = "/", mustWork = FALSE)
 }
 
 `%||%` <- function(x, y) {

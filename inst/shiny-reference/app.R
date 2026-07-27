@@ -71,7 +71,11 @@ default_predictions <- .reference_default(
     file.path(workspace_root, "validation", "liberary", "aed-pkpd-benchmark", "text-current"))
 )
 default_source <- .reference_default(
-  "LIBERARY_REFERENCE_SOURCE", file.path(workspace_root, "AED_PKPD")
+  "LIBERARY_REFERENCE_SOURCE",
+  c(
+    file.path(dirname(LibeRary::library_home()), "research", "AED_PKPD"),
+    file.path(workspace_root, "AED_PKPD")
+  )
 )
 
 shared_www <- system.file("shiny", "www", package = "LibeRary")

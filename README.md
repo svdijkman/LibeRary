@@ -51,10 +51,11 @@ unresolved major model fields and any later qualification work.
 Catalogue data and settings are never stored in the installed package, so they
 survive reinstalls:
 
-- Windows: `C:/Users/<username>/Documents/LibeR/library`
-- Linux/macOS: `~/LibeR/library`
+- Windows: `C:/Users/<username>/Documents/LibeR-data/library`
+- Linux/macOS: `~/LibeR-data/library`
 
-Set `LIBERARY_HOME` or `options(LibeRary.catalog=...)` to override this.
+Existing `LibeR/library` installations remain supported. Set `LIBERARY_HOME`
+or `options(LibeRary.catalog=...)` to override the selected location.
 
 ## Browse and ingest
 
