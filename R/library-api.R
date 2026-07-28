@@ -22,6 +22,8 @@ library_list <- function(status = NULL, root = library_catalog_root()) {
       assessment = character(),
       reproduction = character(),
       qualified = logical(),
+      clinical_status = character(),
+      clinically_qualified = logical(),
       qualification_blockers = character(),
       updated_at = character(),
       stringsAsFactors = FALSE
@@ -43,6 +45,7 @@ library_list <- function(status = NULL, root = library_catalog_root()) {
         trans = NA_integer_, model_type = "", version = "",
         confidence_overall = NA_real_,
         assessment = "", reproduction = "", qualified = FALSE,
+        clinical_status = "", clinically_qualified = FALSE,
         qualification_blockers = "manifest_unreadable", updated_at = "",
         stringsAsFactors = FALSE
       ))
@@ -50,6 +53,12 @@ library_list <- function(status = NULL, root = library_catalog_root()) {
     gate <- manifest$qualification$gate %||% list(
       ready = FALSE, blockers = "qualification_not_run"
     )
+    clinical <- .library_current_clinical_records(
+      manifest$qualification$clinical_use %||% list()
+    )
+    clinical_status <- unique(vapply(clinical, function(record) {
+      as.character(record$status %||% "")
+    }, character(1)))
     data.frame(
       library_id = manifest$library_id %||% e$library_id,
       title = manifest$title %||% "",
@@ -64,6 +73,11 @@ library_list <- function(status = NULL, root = library_catalog_root()) {
       assessment = as.character(manifest$qualification$automated_assessment$verdict %||% ""),
       reproduction = as.character(manifest$qualification$reproduction$status %||% "not_planned"),
       qualified = isTRUE(gate$ready),
+      clinical_status = paste(clinical_status[nzchar(clinical_status)], collapse = "; "),
+      clinically_qualified = any(vapply(clinical, function(record) {
+        identical(record$status, "qualified") &&
+          !.library_clinical_review_overdue(record)
+      }, logical(1))),
       qualification_blockers = paste(as.character(gate$blockers %||% character()), collapse = "; "),
       updated_at = as.character(manifest$updated_at %||% ""),
       stringsAsFactors = FALSE

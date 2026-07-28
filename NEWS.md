@@ -1,3 +1,21 @@
+# LibeRary 0.7.9
+
+- Establishes the clinical-qualification catalogue functions as a versioned
+  public API contract. This prevents an older in-memory or installed 0.7.8
+  namespace from being mistaken for a build that supports qualified-model
+  selection in LibeRator.
+- Clarifies that an empty clinical-qualification collection is a valid
+  catalogue state and is distinct from a missing package API.
+
+# LibeRary 0.7.8
+
+- Adds append-only, versioned clinical-use qualification records scoped to
+  model version, drug, indication, population, route, endpoint, covariates,
+  assay, validation evidence, and issuing organisation.
+- Exposes current clinical qualification status through the catalogue API
+  while retaining the strict distinction between computational qualification,
+  catalogue validation, and institution-specific clinical suitability.
+
 # LibeRary 0.7.7
 
 - Promotes text-lane and vision-lane reconciliation to a versioned,

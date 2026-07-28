@@ -533,7 +533,8 @@ server <- function(input, output, session) {
       ))
     }
     show <- intersect(
-      c("library_id", "title", "status", "compound", "advan", "reproduction", "confidence_overall"),
+      c("library_id", "title", "status", "clinical_status", "compound",
+        "advan", "reproduction", "confidence_overall"),
       names(df)
     )
     datatable(

@@ -569,7 +569,8 @@ ingest_publish_catalog_entry <- function(metadata, extraction, cfg = NULL, statu
       qualification = list(author_validated = FALSE, human_reviewed = FALSE,
                            automated_assessment = assessment %||% list(status = "not_run"),
                            mapping_review_required = mapping$review_required,
-                           reproduction = reproduction, simulation_checks = list(reproduction)),
+                           reproduction = reproduction, simulation_checks = list(reproduction),
+                           clinical_use = list()),
       relations = old_manifest$relations %||% list(same_compound = character(), prior_version = character(), mbma_pool = FALSE)
     )
     checks <- library_validate(manifest = manifest, root = cfg$catalog_dir, check_artifact = FALSE)

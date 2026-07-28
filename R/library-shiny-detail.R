@@ -48,6 +48,43 @@
   implementations <- m$model$implementations %||% list()
   implementation <- if (length(implementations)) implementations[[1L]] else list()
   reproduction <- m$qualification$reproduction %||% list(status = "not_planned")
+  clinical <- .library_current_clinical_records(
+    m$qualification$clinical_use %||% list()
+  )
+  clinical_status <- unique(vapply(clinical, function(record) {
+    as.character(record$status %||% "")
+  }, character(1)))
+  clinical_ui <- if (length(clinical)) {
+    tags$div(class = "lib-cohort-list", lapply(clinical, function(record) {
+      scope <- record$scope %||% list()
+      tags$div(
+        class = "lib-cohort-card",
+        tags$strong(paste(
+          toupper(record$status %||% "unreviewed"),
+          record$qualification_id %||% ""
+        )),
+        tags$div(
+          paste(c(
+            if (length(scope$drugs)) paste("Drug:", paste(scope$drugs, collapse = ", ")),
+            if (length(scope$indications)) paste("Indication:", paste(scope$indications, collapse = ", ")),
+            if (length(scope$routes)) paste("Route:", paste(scope$routes, collapse = ", ")),
+            if (length(scope$endpoint_ids)) paste("Endpoints:", paste(scope$endpoint_ids, collapse = ", ")),
+            if (length(scope$endpoint_kinds)) paste("Endpoint families:", paste(scope$endpoint_kinds, collapse = ", "))
+          ), collapse = " \u00b7 ")
+        ),
+        tags$span(
+          class = "text-muted",
+          paste(
+            "Issuer:", record$governance$issuer %||% "\u2014",
+            "\u00b7 Reviewer:", record$governance$reviewer %||% "\u2014"
+          )
+        )
+      )
+    }))
+  } else tags$p(
+    class = "text-muted",
+    "No institution-specific clinical-use qualification is recorded."
+  )
   ledger_path <- file.path(entry$paths$extraction, "evidence-ledger.json")
   ledger <- if (file.exists(ledger_path)) {
     tryCatch(jsonlite::fromJSON(ledger_path, simplifyVector = FALSE), error = function(e) NULL)
@@ -124,6 +161,16 @@
     tags$div(class = "lib-detail-id", id),
     tags$span(class = "lib-status-pill",
               style = paste0("background:", .library_status_color(st), ";"), st),
+    if (length(clinical_status)) tags$span(
+      class = "lib-status-pill",
+      style = paste0(
+        "margin-left:6px;background:",
+        if (any(clinical_status == "qualified")) "#237a57" else
+          if (any(clinical_status == "suspended")) "#b24b57" else "#8a6a2e",
+        ";"
+      ),
+      paste(clinical_status, collapse = ", ")
+    ),
     if (length(links)) tags$div(class = "lib-detail-actions", links),
     tags$div(
       class = "lib-meta-grid",
@@ -139,6 +186,8 @@
                ) else "\u2014"),
       tags$div(tags$span(class = "lib-meta-label", "Reproduction"),
                reproduction$status %||% "not_planned"),
+      tags$div(tags$span(class = "lib-meta-label", "Clinical use"),
+               if (length(clinical_status)) paste(clinical_status, collapse = ", ") else "not qualified"),
       tags$div(tags$span(class = "lib-meta-label", "Confidence"),
                if (!is.null(m$confidence$overall)) round(as.numeric(m$confidence$overall), 2) else "\u2014"),
       tags$div(tags$span(class = "lib-meta-label", "Keywords"), kw_txt)
@@ -155,6 +204,8 @@
         paste0(" \u2014 ", paste(unlist(reproduction$blockers), collapse = ", "))
       }
     ),
+    tags$h5("Clinical-use qualification"),
+    clinical_ui,
     tags$h5("Provenance"),
     prov_lines,
     tags$h5("Model (model.ctl)"),

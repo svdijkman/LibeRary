@@ -6,7 +6,7 @@
 \alias{LibeRary-package}
 \title{LibeRary: Pharmacometric Model Repository for the LibeR Ecosystem}
 \description{
-Searchable, versioned pharmacometric model repository and literature ingestion workflow for the LibeR ecosystem. Discovers publications, acquires full text, extracts and independently reconciles model evidence with user-selectable local or remote language models, retains auditable provenance, and imports NONMEM-style models into LibeRation workspaces.
+Searchable, versioned pharmacometric model repository and literature ingestion workflow for the LibeR ecosystem. Discovers publications, acquires full text, extracts and independently reconciles model evidence with user-selectable local or remote language models, retains auditable provenance, and imports NONMEM-style models into LibeRation workspaces. Stores scoped, versioned, issuer-specific clinical-use qualification records without presenting catalogue inclusion as universal clinical approval.
 }
 \author{
 \strong{Maintainer}: Sven C. van Dijkman \email{svdijkman@users.noreply.github.com}

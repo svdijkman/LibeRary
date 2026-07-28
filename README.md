@@ -75,6 +75,45 @@ The LibeRation GUI includes a **Model library** popup. An imported catalogue
 entry becomes a normal model version with immutable evidence and qualification
 provenance.
 
+## Scoped clinical-use qualification
+
+LibeRary keeps scientific catalogue validation separate from clinical-use
+qualification. A model can be structurally validated without being suitable for
+a particular drug, indication, population, assay, regimen, or therapeutic
+endpoint. Clinical-use records are append-only, issuer-specific, tied to an
+exact model hash, review dated, and scoped explicitly; they are not a claim of
+universal regulatory approval.
+
+```r
+qualification <- library_clinical_qualification(
+  library_id = "lib_theo_synthetic",
+  status = "candidate",
+  scope = list(
+    drugs = "theophylline",
+    indications = "asthma",
+    routes = "oral",
+    endpoint_ids = "theophylline-range",
+    endpoint_kinds = "therapeutic_range",
+    required_covariates = c("WT", "AGE"),
+    assay = list(matrix = "plasma", unit = "mg/L")
+  ),
+  issuer = "institution/model-governance-group",
+  reviewer = "reviewer-id",
+  rationale = "Scoped review record",
+  evidence = list("validation-report-id"),
+  review_due = as.character(Sys.Date() + 365)
+)
+
+library_clinical_qualify(qualification)
+library_clinical_qualifications("lib_theo_synthetic", current = TRUE)
+```
+
+Only a current `qualified` record is eligible for automatic model selection in
+LibeRator. Expired, suspended, retired, merely candidate, or superseded records
+fail closed. LibeRator then applies the qualification scope to the patient data
+available at the requested decision time and preserves the resulting evidence
+as an auditable selection object.
+
 ## Configure models and Docling
 
 Ollama is the local default. OpenAI and OpenAI-compatible endpoints are also
