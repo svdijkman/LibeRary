@@ -1,3 +1,8 @@
+# LibeRary 0.7.11
+
+- Publishes the final shared asynchronous task-state runtime under a new
+  immutable package version after the 0.7.10 release tag.
+
 # LibeRary 0.7.10
 
 - Upgrades older active copies of packaged catalogue entries when a newer

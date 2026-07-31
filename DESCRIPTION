@@ -1,6 +1,6 @@
 Package: LibeRary
 Title: Pharmacometric Model Repository for the LibeR Ecosystem
-Version: 0.7.10
+Version: 0.7.11
 Authors@R:
     person("Sven C.", "van Dijkman", email = "svdijkman@users.noreply.github.com", role = c("aut", "cre"))
 Description: Searchable, versioned pharmacometric model repository and literature
