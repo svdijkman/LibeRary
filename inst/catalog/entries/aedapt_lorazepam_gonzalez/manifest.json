@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.5.0",
+  "library_id": "aedapt_lorazepam_gonzalez",
+  "version": "1.0.0",
+  "status": "review",
+  "title": "Lorazepam population PK - Gonzalez legacy model",
+  "model": {
+    "artifact": "model.ctl",
+    "advan": 4,
+    "trans": 4,
+    "type": "pk",
+    "use_ode": false,
+    "generated_suggestion": true,
+    "mapping_review_required": true
+  },
+  "study": {
+    "compound": "lorazepam",
+    "population": "Paediatric multinational population",
+    "population_details": [],
+    "route": "oral",
+    "n_subjects": null,
+    "assay_unit": "mcg/L",
+    "keywords": ["population pk", "antiseizure medicine", "AEDapt migration", "compartmental"],
+    "dataset_fingerprint": "aedapt:fd3b993a0ec5a049c1a17c241f969b5043034eef6d5e1e1f31ee183e8a4a71f0"
+  },
+  "confidence": {
+    "overall": 0.86,
+    "fields": {
+      "structure": 0.9,
+      "parameters": 0.9,
+      "population": 0.65
+    }
+  },
+  "provenance": {
+    "source_type": "legacy_curated_model",
+    "origin": "AEDapt",
+    "source_file": "LRZP_AP_GONZALEZ.R",
+    "source_sha256": "fd3b993a0ec5a049c1a17c241f969b5043034eef6d5e1e1f31ee183e8a4a71f0",
+    "source_repository_included": false,
+    "reference_corpus_id": "",
+    "pmid": "",
+    "migration_method": "deterministic curated translation",
+    "corrections": [],
+    "assumptions": [],
+    "description": "Translated from the legacy AEDapt model definition. Published information was preferred over executable legacy code when they differed."
+  },
+  "qualification": {
+    "author_validated": false,
+    "curator": "LibeR AEDapt migration - independent review pending",
+    "clinical_use": [
+      {
+        "schema": "liberary.clinical_qualification",
+        "schema_version": "1.0.0",
+        "qualification_id": "cq-aedapt_lorazepam_gonzalez-candidate",
+        "version": "1.0.0",
+        "status": "candidate",
+        "scope": {
+          "drugs": "lorazepam",
+          "analytes": "lorazepam",
+          "metabolites": [],
+          "indications": ["epilepsy", "seizure disorder"],
+          "routes": "oral",
+          "formulations": [],
+          "regimens": [],
+          "endpoint_ids": [],
+          "endpoint_kinds": "therapeutic_range",
+          "population": {
+            "age": {
+              "min": 0.3,
+              "max": 18,
+              "unit": "years",
+              "required": true,
+              "hard": true,
+              "covariate": "AGE"
+            }
+          },
+          "covariates": {
+            "required": ["WT", "AGE"],
+            "optional": [],
+            "supported_imputation": [],
+            "ranges": []
+          },
+          "assays": {
+            "required": true,
+            "matrices": ["plasma", "serum"],
+            "methods": [],
+            "units": "mcg/L"
+          }
+        },
+        "evidence": {
+          "source": "AEDapt legacy implementation plus AED PK/PD review corpus",
+          "computational_translation": "control-stream parse checked",
+          "clinical_validation": "not performed",
+          "model_sha256": "8bf01009b94a7d17b0571975fa93a1ef85733d43f9b3e03214b17332a5e4a083"
+        },
+        "governance": {
+          "issuer": "LibeR AEDapt migration",
+          "reviewer": "",
+          "valid_from": "2026-07-29T00:00:00Z",
+          "review_due": ""
+        },
+        "limitations": "Research candidate only; independent source verification and clinical qualification are required before patient-care use.",
+        "out_of_domain_rules": {
+          "reject_outside_age_range": true,
+          "reject_missing_required_covariates": true,
+          "require_qualified_status_for_automatic_selection": true
+        },
+        "supersedes": "",
+        "notes": "Migrated from AEDapt; catalogue availability is not clinical endorsement.",
+        "created_at": "2026-07-29T00:00:00Z",
+        "model": {
+          "library_id": "aedapt_lorazepam_gonzalez",
+          "version": "1.0.0",
+          "model_sha256": "8bf01009b94a7d17b0571975fa93a1ef85733d43f9b3e03214b17332a5e4a083",
+          "manifest_schema_version": "1.5.0"
+        }
+      }
+    ]
+  },
+  "relations": {
+    "same_compound": [],
+    "prior_version": [],
+    "mbma_pool": false
+  },
+  "created_at": "2026-07-29T00:00:00Z",
+  "updated_at": "2026-07-29T00:00:00Z"
+}

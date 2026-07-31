@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.5.0",
+  "library_id": "aedapt_clobazam_lamba",
+  "version": "1.0.0",
+  "status": "review",
+  "title": "Clobazam population PK - Lamba legacy model",
+  "model": {
+    "artifact": "model.ctl",
+    "advan": 2,
+    "trans": 2,
+    "type": "pk",
+    "use_ode": false,
+    "generated_suggestion": true,
+    "mapping_review_required": true
+  },
+  "study": {
+    "compound": "clobazam",
+    "population": "Predominantly White paediatric and young-adult population",
+    "population_details": [],
+    "route": "oral",
+    "n_subjects": null,
+    "assay_unit": "mcg/L",
+    "keywords": ["population pk", "antiseizure medicine", "AEDapt migration", "compartmental"],
+    "dataset_fingerprint": "aedapt:3c7e7160981edeb62cc1bb5de7c06f596df8a9da984daf92c33cec0044b01e19"
+  },
+  "confidence": {
+    "overall": 0.72,
+    "fields": {
+      "structure": 0.7,
+      "parameters": 0.9,
+      "population": 0.65
+    }
+  },
+  "provenance": {
+    "source_type": "legacy_curated_model",
+    "origin": "AEDapt",
+    "source_file": "CLBZ_AP_LAMBA.R",
+    "source_sha256": "3c7e7160981edeb62cc1bb5de7c06f596df8a9da984daf92c33cec0044b01e19",
+    "source_repository_included": false,
+    "reference_corpus_id": "",
+    "pmid": "",
+    "migration_method": "deterministic curated translation",
+    "corrections": [],
+    "assumptions": "A 20% proportional residual-error SD (SIGMA=0.04) was added because AEDapt did not retain a residual model.",
+    "description": "Translated from the legacy AEDapt model definition. Published information was preferred over executable legacy code when they differed."
+  },
+  "qualification": {
+    "author_validated": false,
+    "curator": "LibeR AEDapt migration - independent review pending",
+    "clinical_use": [
+      {
+        "schema": "liberary.clinical_qualification",
+        "schema_version": "1.0.0",
+        "qualification_id": "cq-aedapt_clobazam_lamba-candidate",
+        "version": "1.0.0",
+        "status": "candidate",
+        "scope": {
+          "drugs": "clobazam",
+          "analytes": "clobazam",
+          "metabolites": [],
+          "indications": ["epilepsy", "seizure disorder"],
+          "routes": "oral",
+          "formulations": [],
+          "regimens": [],
+          "endpoint_ids": [],
+          "endpoint_kinds": "therapeutic_range",
+          "population": {
+            "age": {
+              "min": 1,
+              "max": 23,
+              "unit": "years",
+              "required": true,
+              "hard": true,
+              "covariate": "AGE"
+            }
+          },
+          "covariates": {
+            "required": "WT",
+            "optional": [],
+            "supported_imputation": [],
+            "ranges": []
+          },
+          "assays": {
+            "required": true,
+            "matrices": ["plasma", "serum"],
+            "methods": [],
+            "units": "mcg/L"
+          }
+        },
+        "evidence": {
+          "source": "AEDapt legacy implementation plus AED PK/PD review corpus",
+          "computational_translation": "control-stream parse checked",
+          "clinical_validation": "not performed",
+          "model_sha256": "496d10632f83291c3bcfa5b6409abeb206b329efc5d8e670a5379403086cc761"
+        },
+        "governance": {
+          "issuer": "LibeR AEDapt migration",
+          "reviewer": "",
+          "valid_from": "2026-07-29T00:00:00Z",
+          "review_due": ""
+        },
+        "limitations": ["Research candidate only; independent source verification and clinical qualification are required before patient-care use.", "A 20% proportional residual-error SD (SIGMA=0.04) was added because AEDapt did not retain a residual model."],
+        "out_of_domain_rules": {
+          "reject_outside_age_range": true,
+          "reject_missing_required_covariates": true,
+          "require_qualified_status_for_automatic_selection": true
+        },
+        "supersedes": "",
+        "notes": "Migrated from AEDapt; catalogue availability is not clinical endorsement.",
+        "created_at": "2026-07-29T00:00:00Z",
+        "model": {
+          "library_id": "aedapt_clobazam_lamba",
+          "version": "1.0.0",
+          "model_sha256": "496d10632f83291c3bcfa5b6409abeb206b329efc5d8e670a5379403086cc761",
+          "manifest_schema_version": "1.5.0"
+        }
+      }
+    ]
+  },
+  "relations": {
+    "same_compound": [],
+    "prior_version": [],
+    "mbma_pool": false
+  },
+  "created_at": "2026-07-29T00:00:00Z",
+  "updated_at": "2026-07-29T00:00:00Z"
+}

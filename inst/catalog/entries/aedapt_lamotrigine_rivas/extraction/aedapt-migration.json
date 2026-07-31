@@ -1,0 +1,22 @@
+{
+  "schema": "liberary.aedapt_migration",
+  "schema_version": "1.0.0",
+  "library_id": "aedapt_lamotrigine_rivas",
+  "source": {
+    "application": "AEDapt",
+    "file": "LMT_A_RIVAS.R",
+    "sha256": "ca680efd7ddf542ff110ea112f49879fb6a55c40f258fa93a55a5f181cc1c3c9",
+    "author_label": "Rivas"
+  },
+  "reference": {
+    "corpus_id": "aed-pkpd-reference",
+    "corpus_version": "0.2.2",
+    "reference_id": "aed_lmt_18641550_m01",
+    "pmid": "18641550"
+  },
+  "decisions": {
+    "corrections": "Restored the individual comedication effects that were overwritten by a second TVCL assignment in AEDapt.",
+    "assumptions": [],
+    "clinical_status": "candidate"
+  }
+}

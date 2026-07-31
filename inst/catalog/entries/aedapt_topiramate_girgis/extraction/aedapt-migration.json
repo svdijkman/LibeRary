@@ -1,0 +1,22 @@
+{
+  "schema": "liberary.aedapt_migration",
+  "schema_version": "1.0.0",
+  "library_id": "aedapt_topiramate_girgis",
+  "source": {
+    "application": "AEDapt",
+    "file": "TPM_AP_GIRGIS.R",
+    "sha256": "47a183ed78d91d523358b18b5c4edecec923e05008c5ea5cbae709b99c2482c4",
+    "author_label": "Girgis"
+  },
+  "reference": {
+    "corpus_id": "aed-pkpd-reference",
+    "corpus_version": "0.2.2",
+    "reference_id": "aed_tpm_20880232_m01",
+    "pmid": "20880232"
+  },
+  "decisions": {
+    "corrections": "Converted reported K12/K21 values to Q and V2 for ADVAN4/TRANS4.",
+    "assumptions": [],
+    "clinical_status": "candidate"
+  }
+}

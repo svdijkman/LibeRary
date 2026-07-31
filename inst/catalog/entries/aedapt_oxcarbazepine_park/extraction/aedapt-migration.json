@@ -1,0 +1,22 @@
+{
+  "schema": "liberary.aedapt_migration",
+  "schema_version": "1.0.0",
+  "library_id": "aedapt_oxcarbazepine_park",
+  "source": {
+    "application": "AEDapt",
+    "file": "OXC_AP_PARK.R",
+    "sha256": "92db255bc5aca8507e40eca388e181d9c6df9bcfa1b964f52926150e33a868e3",
+    "author_label": "Park"
+  },
+  "reference": {
+    "corpus_id": "aed-pkpd-reference",
+    "corpus_version": "0.2.2",
+    "reference_id": "aed_oxc_22246398_m01",
+    "pmid": "22246398"
+  },
+  "decisions": {
+    "corrections": [],
+    "assumptions": [],
+    "clinical_status": "candidate"
+  }
+}

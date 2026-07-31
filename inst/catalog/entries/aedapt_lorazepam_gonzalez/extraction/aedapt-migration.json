@@ -1,0 +1,22 @@
+{
+  "schema": "liberary.aedapt_migration",
+  "schema_version": "1.0.0",
+  "library_id": "aedapt_lorazepam_gonzalez",
+  "source": {
+    "application": "AEDapt",
+    "file": "LRZP_AP_GONZALEZ.R",
+    "sha256": "fd3b993a0ec5a049c1a17c241f969b5043034eef6d5e1e1f31ee183e8a4a71f0",
+    "author_label": "Gonzalez"
+  },
+  "reference": {
+    "corpus_id": "aed-pkpd-reference",
+    "corpus_version": "0.2.2",
+    "reference_id": "",
+    "pmid": ""
+  },
+  "decisions": {
+    "corrections": [],
+    "assumptions": [],
+    "clinical_status": "candidate"
+  }
+}

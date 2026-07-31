@@ -1,0 +1,22 @@
+{
+  "schema": "liberary.aedapt_migration",
+  "schema_version": "1.0.0",
+  "library_id": "aedapt_cbz_jiao",
+  "source": {
+    "application": "AEDapt",
+    "file": "CBZ_AP_JIAO.R",
+    "sha256": "e8814956dad879cbe157db83fd6c6aed786dc228801956e80dca451eae1c99a7",
+    "author_label": "Jiao"
+  },
+  "reference": {
+    "corpus_id": "aed-pkpd-reference",
+    "corpus_version": "0.2.2",
+    "reference_id": "aed_cbz_12766553_m01",
+    "pmid": "12766553"
+  },
+  "decisions": {
+    "corrections": ["Restored V/F=0.849*WT; AEDapt had substituted 1.5*WT.", "Corrected the AEDapt THETA7/THETA8 label and implementation swap.", "Retained OMEGA values as variances; no CV or SD reconversion."],
+    "assumptions": [],
+    "clinical_status": "candidate"
+  }
+}

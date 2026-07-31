@@ -1,21 +1,138 @@
 {
-  "schema_version": "1.1.0",
-  "updated_at": "2026-07-08T00:13:35+0000",
+  "schema_version": "1.5.0",
+  "updated_at": "2026-07-29T00:00:00Z",
   "entries": [
     {
-      "library_id": "lib_theo_synthetic",
-      "title": "THEO — oral 2-compartment",
-      "status": "validated"
+      "library_id": "aedapt_cbz_delgado",
+      "title": "Carbamazepine population PK - Delgado et al.",
+      "status": "review",
+      "updated_at": "2026-07-29T00:00:00Z"
+    },
+    {
+      "library_id": "aedapt_cbz_jiao",
+      "title": "Carbamazepine population PK - Jiao et al.",
+      "status": "review",
+      "updated_at": "2026-07-29T00:00:00Z"
+    },
+    {
+      "library_id": "aedapt_clobazam_lamba",
+      "title": "Clobazam population PK - Lamba legacy model",
+      "status": "review",
+      "updated_at": "2026-07-29T00:00:00Z"
+    },
+    {
+      "library_id": "aedapt_clobazam_saruwatari",
+      "title": "Clobazam population PK - Saruwatari legacy model",
+      "status": "review",
+      "updated_at": "2026-07-29T00:00:00Z"
+    },
+    {
+      "library_id": "aedapt_clonazepam_yukawa",
+      "title": "Clonazepam steady-state PK - Yukawa legacy model",
+      "status": "review",
+      "updated_at": "2026-07-29T00:00:00Z"
+    },
+    {
+      "library_id": "aedapt_lamotrigine_he",
+      "title": "Lamotrigine population PK - He et al.",
+      "status": "review",
+      "updated_at": "2026-07-29T00:00:00Z"
+    },
+    {
+      "library_id": "aedapt_lamotrigine_rivas",
+      "title": "Lamotrigine population PK - Rivas et al.",
+      "status": "review",
+      "updated_at": "2026-07-29T00:00:00Z"
+    },
+    {
+      "library_id": "aedapt_levetiracetam_toublanc",
+      "title": "Levetiracetam population PK - Toublanc et al.",
+      "status": "review",
+      "updated_at": "2026-07-29T00:00:00Z"
+    },
+    {
+      "library_id": "aedapt_lorazepam_gonzalez",
+      "title": "Lorazepam population PK - Gonzalez legacy model",
+      "status": "review",
+      "updated_at": "2026-07-29T00:00:00Z"
+    },
+    {
+      "library_id": "aedapt_oxcarbazepine_park",
+      "title": "Oxcarbazepine active-metabolite population PK - Park et al.",
+      "status": "review",
+      "updated_at": "2026-07-29T00:00:00Z"
+    },
+    {
+      "library_id": "aedapt_phenobarbital_goto",
+      "title": "Phenobarbital population PK - Goto et al.",
+      "status": "review",
+      "updated_at": "2026-07-29T00:00:00Z"
+    },
+    {
+      "library_id": "aedapt_phenytoin_odani",
+      "title": "Phenytoin nonlinear population PK - Odani et al.",
+      "status": "review",
+      "updated_at": "2026-07-29T00:00:00Z"
+    },
+    {
+      "library_id": "aedapt_phenytoin_yukawa",
+      "title": "Phenytoin nonlinear population PK - Yukawa et al.",
+      "status": "review",
+      "updated_at": "2026-07-29T00:00:00Z"
+    },
+    {
+      "library_id": "aedapt_topiramate_girgis",
+      "title": "Topiramate population PK - Girgis et al.",
+      "status": "review",
+      "updated_at": "2026-07-29T00:00:00Z"
+    },
+    {
+      "library_id": "aedapt_topiramate_jovanovic",
+      "title": "Topiramate population PK - Jovanovic et al.",
+      "status": "review",
+      "updated_at": "2026-07-29T00:00:00Z"
+    },
+    {
+      "library_id": "aedapt_valproate_blanco_adult",
+      "title": "Valproate adult population PK - Blanco et al.",
+      "status": "review",
+      "updated_at": "2026-07-29T00:00:00Z"
+    },
+    {
+      "library_id": "aedapt_valproate_blanco_paediatric",
+      "title": "Valproate paediatric population PK - Blanco et al.",
+      "status": "review",
+      "updated_at": "2026-07-29T00:00:00Z"
+    },
+    {
+      "library_id": "aedapt_zonisamide_hashimoto",
+      "title": "Zonisamide nonlinear population PK - Hashimoto et al.",
+      "status": "review",
+      "updated_at": "2026-07-29T00:00:00Z"
+    },
+    {
+      "library_id": "aedapt_zonisamide_okada",
+      "title": "Zonisamide population PK - Okada et al.",
+      "status": "review",
+      "updated_at": "2026-07-29T00:00:00Z"
     },
     {
       "library_id": "lib_iv1_synthetic",
       "title": "IV bolus — 1-compartment",
-      "status": "validated"
+      "status": "validated",
+      "updated_at": ""
     },
     {
       "library_id": "lib_iv2_synthetic",
       "title": "IV bolus — 2-compartment",
-      "status": "validated"
+      "status": "validated",
+      "updated_at": ""
+    },
+    {
+      "library_id": "lib_theo_synthetic",
+      "title": "THEO — oral 2-compartment",
+      "status": "validated",
+      "updated_at": ""
     }
   ]
 }

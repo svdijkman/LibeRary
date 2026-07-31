@@ -1,0 +1,22 @@
+{
+  "schema": "liberary.aedapt_migration",
+  "schema_version": "1.0.0",
+  "library_id": "aedapt_lamotrigine_he",
+  "source": {
+    "application": "AEDapt",
+    "file": "LMT_P_HE.R",
+    "sha256": "3a00644ae597062f68d1889f2d3a686af7df67de7c71c8e9fbb5817ed2e978de",
+    "author_label": "He"
+  },
+  "reference": {
+    "corpus_id": "aed-pkpd-reference",
+    "corpus_version": "0.2.2",
+    "reference_id": "aed_lmt_23103620_m01",
+    "pmid": "23103620"
+  },
+  "decisions": {
+    "corrections": "Corrected the legacy AEDapt volume implementation to the published V/F = 16.7 * (WT / 27.87) L relationship.",
+    "assumptions": [],
+    "clinical_status": "candidate"
+  }
+}

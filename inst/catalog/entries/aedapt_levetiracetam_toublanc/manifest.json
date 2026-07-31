@@ -1,0 +1,206 @@
+{
+  "schema_version": "1.5.0",
+  "library_id": "aedapt_levetiracetam_toublanc",
+  "version": "1.0.0",
+  "status": "review",
+  "title": "Levetiracetam population PK - Toublanc et al.",
+  "model": {
+    "artifact": "model.ctl",
+    "advan": 2,
+    "trans": 2,
+    "type": "pk",
+    "use_ode": false,
+    "generated_suggestion": true,
+    "mapping_review_required": true
+  },
+  "study": {
+    "compound": "levetiracetam",
+    "population": "N: 443 (Japan and North America) Age: 26.8±13.5 (4.3-55.4) WT: 59.8±12.6 (40.0-107)",
+    "population_details": {
+      "raw": "N: 443 (Japan and North America) Age: 26.8±13.5 (4.3-55.4) WT: 59.8±12.6 (40.0-107)",
+      "n_total": 443,
+      "cohorts": [
+        {
+          "id": "overall",
+          "label": "overall",
+          "role": "unspecified",
+          "n": {
+            "enrolled": null,
+            "dosed": null,
+            "analysed": 443
+          },
+          "health_status": "unspecified",
+          "country": null,
+          "descriptors": [
+            {
+              "name": "age",
+              "unit": "years",
+              "statistics": [
+                {
+                  "type": "mean_sd",
+                  "mean": 26.8,
+                  "sd": 13.5
+                },
+                {
+                  "type": "range",
+                  "minimum": 4.3,
+                  "maximum": 55.4
+                }
+              ],
+              "categories": [],
+              "source": {
+                "status": "reported",
+                "source_locator": "appendix study row 6",
+                "evidence": "26.8±13.5 (4.3-55.4)",
+                "confidence": 1
+              }
+            },
+            {
+              "name": "weight",
+              "unit": "kg",
+              "statistics": [
+                {
+                  "type": "mean_sd",
+                  "mean": 59.8,
+                  "sd": 12.6
+                },
+                {
+                  "type": "range",
+                  "minimum": 40,
+                  "maximum": 107
+                }
+              ],
+              "categories": [],
+              "source": {
+                "status": "reported",
+                "source_locator": "appendix study row 6",
+                "evidence": "59.8±12.6 (40.0-107)",
+                "confidence": 1
+              }
+            }
+          ],
+          "pharmacogenetics": [],
+          "source": {
+            "status": "reported",
+            "source_locator": "appendix study row 6",
+            "evidence": "N: 443 (Japan and North America) Age: 26.8±13.5 (4.3-55.4) WT: 59.8±12.6 (40.0-107)",
+            "confidence": 1
+          }
+        }
+      ],
+      "assumptions": [],
+      "source": {
+        "status": "reported",
+        "source_locator": "appendix study row 6",
+        "evidence": "N: 443 (Japan and North America) Age: 26.8±13.5 (4.3-55.4) WT: 59.8±12.6 (40.0-107)",
+        "confidence": 1
+      }
+    },
+    "route": "oral",
+    "n_subjects": 443,
+    "assay_unit": "mg/L",
+    "keywords": ["population pk", "antiseizure medicine", "AEDapt migration", "compartmental"],
+    "dataset_fingerprint": "pmid:23877106"
+  },
+  "confidence": {
+    "overall": 0.86,
+    "fields": {
+      "structure": 0.9,
+      "parameters": 0.9,
+      "population": 0.95
+    }
+  },
+  "provenance": {
+    "source_type": "legacy_curated_model",
+    "origin": "AEDapt",
+    "source_file": "LVT_AP_TOUBLANC.R",
+    "source_sha256": "efa5b7f04c42331a2e6111de926746e3d35ce3aba77b2b2934de73b4d25bce10",
+    "source_repository_included": false,
+    "reference_corpus_id": "aed_lvt_23877106_m01",
+    "pmid": "23877106",
+    "migration_method": "deterministic curated translation",
+    "corrections": "Rebuilt the CL/V covariance as the reported 0.00328 NONMEM covariance; AEDapt square-rooted matrix elements before covariance simulation.",
+    "assumptions": [],
+    "description": "Translated from the legacy AEDapt model definition. Published information was preferred over executable legacy code when they differed."
+  },
+  "qualification": {
+    "author_validated": false,
+    "curator": "LibeR AEDapt migration - independent review pending",
+    "clinical_use": [
+      {
+        "schema": "liberary.clinical_qualification",
+        "schema_version": "1.0.0",
+        "qualification_id": "cq-aedapt_levetiracetam_toublanc-candidate",
+        "version": "1.0.0",
+        "status": "candidate",
+        "scope": {
+          "drugs": "levetiracetam",
+          "analytes": "levetiracetam",
+          "metabolites": [],
+          "indications": ["epilepsy", "seizure disorder"],
+          "routes": "oral",
+          "formulations": [],
+          "regimens": [],
+          "endpoint_ids": [],
+          "endpoint_kinds": "therapeutic_range",
+          "population": {
+            "age": {
+              "min": 4.3,
+              "max": 55.4,
+              "unit": "years",
+              "required": true,
+              "hard": true,
+              "covariate": "AGE"
+            }
+          },
+          "covariates": {
+            "required": "WT",
+            "optional": "FORMULATION_IND",
+            "supported_imputation": [],
+            "ranges": []
+          },
+          "assays": {
+            "required": true,
+            "matrices": ["plasma", "serum"],
+            "methods": [],
+            "units": "mg/L"
+          }
+        },
+        "evidence": {
+          "source": "AEDapt legacy implementation plus AED PK/PD review corpus",
+          "computational_translation": "control-stream parse checked",
+          "clinical_validation": "not performed",
+          "model_sha256": "c2689bf896c1cb71bf372aceab1a78d124c7f8f354ed20b7f95f3e50d7c2e417"
+        },
+        "governance": {
+          "issuer": "LibeR AEDapt migration",
+          "reviewer": "",
+          "valid_from": "2026-07-29T00:00:00Z",
+          "review_due": ""
+        },
+        "limitations": "Research candidate only; independent source verification and clinical qualification are required before patient-care use.",
+        "out_of_domain_rules": {
+          "reject_outside_age_range": true,
+          "reject_missing_required_covariates": true,
+          "require_qualified_status_for_automatic_selection": true
+        },
+        "supersedes": "",
+        "notes": "Migrated from AEDapt; catalogue availability is not clinical endorsement.",
+        "created_at": "2026-07-29T00:00:00Z",
+        "model": {
+          "library_id": "aedapt_levetiracetam_toublanc",
+          "version": "1.0.0",
+          "model_sha256": "c2689bf896c1cb71bf372aceab1a78d124c7f8f354ed20b7f95f3e50d7c2e417",
+          "manifest_schema_version": "1.5.0"
+        }
+      }
+    ]
+  },
+  "relations": {
+    "same_compound": [],
+    "prior_version": [],
+    "mbma_pool": false
+  },
+  "created_at": "2026-07-29T00:00:00Z",
+  "updated_at": "2026-07-29T00:00:00Z"
+}

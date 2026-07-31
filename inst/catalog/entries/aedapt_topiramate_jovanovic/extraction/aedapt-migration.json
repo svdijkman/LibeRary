@@ -1,0 +1,22 @@
+{
+  "schema": "liberary.aedapt_migration",
+  "schema_version": "1.0.0",
+  "library_id": "aedapt_topiramate_jovanovic",
+  "source": {
+    "application": "AEDapt",
+    "file": "TPM_A_JOVANOVIC.R",
+    "sha256": "13069e091d326f1a0c80732a6b6525a79dd1a32ff925f1277dbbb05777cfcfeb",
+    "author_label": "Jovanovic"
+  },
+  "reference": {
+    "corpus_id": "aed-pkpd-reference",
+    "corpus_version": "0.2.2",
+    "reference_id": "aed_tpm_23891703_m01",
+    "pmid": "23891703"
+  },
+  "decisions": {
+    "corrections": "Removed AEDapt's randomly simulated MDRD/sex values; measured MDRD and carbamazepine daily dose are required.",
+    "assumptions": [],
+    "clinical_status": "candidate"
+  }
+}

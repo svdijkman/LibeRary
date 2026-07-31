@@ -1,0 +1,22 @@
+{
+  "schema": "liberary.aedapt_migration",
+  "schema_version": "1.0.0",
+  "library_id": "aedapt_clonazepam_yukawa",
+  "source": {
+    "application": "AEDapt",
+    "file": "CLNZ_AP_YUKAWA.R",
+    "sha256": "ac51c4719be93864b6eb282c1345d6dcc6c652e13c9f80c0c58994989e1d3888",
+    "author_label": "Yukawa"
+  },
+  "reference": {
+    "corpus_id": "aed-pkpd-reference",
+    "corpus_version": "0.2.2",
+    "reference_id": "aed_clnz_14651674_m01",
+    "pmid": "14651674"
+  },
+  "decisions": {
+    "corrections": "Recorded the discrepancy between AEDapt's Yukawa attribution and the mapped appendix reference for independent review.",
+    "assumptions": "The retained AEDapt model predicts average steady-state concentration only; no V/F or KA was available for dynamic forecasting.",
+    "clinical_status": "candidate"
+  }
+}

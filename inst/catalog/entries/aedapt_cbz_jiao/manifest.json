@@ -1,0 +1,253 @@
+{
+  "schema_version": "1.5.0",
+  "library_id": "aedapt_cbz_jiao",
+  "version": "1.0.0",
+  "status": "review",
+  "title": "Carbamazepine population PK - Jiao et al.",
+  "model": {
+    "artifact": "model.ctl",
+    "advan": 2,
+    "trans": 2,
+    "type": "pk",
+    "use_ode": false,
+    "generated_suggestion": true,
+    "mapping_review_required": true
+  },
+  "study": {
+    "compound": "carbamazepine",
+    "population": "Index N: 585 (Chinese) Age: 23.3 (1.2-85.1) WT: 53 (5-115) Validation N: 40 (Chinese) Age: 26.2 (7.4-72) WT: 55.5 (25-101)",
+    "population_details": {
+      "raw": "Index N: 585 (Chinese) Age: 23.3 (1.2-85.1) WT: 53 (5-115) Validation N: 40 (Chinese) Age: 26.2 (7.4-72) WT: 55.5 (25-101)",
+      "n_total": 625,
+      "cohorts": [
+        {
+          "id": "cohort_1",
+          "label": "Index",
+          "role": "unspecified",
+          "n": {
+            "enrolled": null,
+            "dosed": null,
+            "analysed": 585
+          },
+          "health_status": "unspecified",
+          "country": null,
+          "descriptors": [
+            {
+              "name": "age",
+              "unit": "years",
+              "statistics": [
+                {
+                  "type": "range",
+                  "minimum": 1.2,
+                  "maximum": 85.1
+                }
+              ],
+              "categories": [],
+              "source": {
+                "status": "reported",
+                "source_locator": "appendix study row 21",
+                "evidence": "23.3 (1.2-85.1)",
+                "confidence": 1
+              }
+            },
+            {
+              "name": "weight",
+              "unit": "kg",
+              "statistics": [
+                {
+                  "type": "range",
+                  "minimum": 5,
+                  "maximum": 115
+                }
+              ],
+              "categories": [],
+              "source": {
+                "status": "reported",
+                "source_locator": "appendix study row 21",
+                "evidence": "53 (5-115)",
+                "confidence": 1
+              }
+            }
+          ],
+          "pharmacogenetics": [],
+          "source": {
+            "status": "reported",
+            "source_locator": "appendix study row 21",
+            "evidence": "N: 585 (Chinese) Age: 23.3 (1.2-85.1) WT: 53 (5-115)",
+            "confidence": 1
+          }
+        },
+        {
+          "id": "cohort_2",
+          "label": "Validation",
+          "role": "unspecified",
+          "n": {
+            "enrolled": null,
+            "dosed": null,
+            "analysed": 40
+          },
+          "health_status": "unspecified",
+          "country": null,
+          "descriptors": [
+            {
+              "name": "age",
+              "unit": "years",
+              "statistics": [
+                {
+                  "type": "range",
+                  "minimum": 7.4,
+                  "maximum": 72
+                }
+              ],
+              "categories": [],
+              "source": {
+                "status": "reported",
+                "source_locator": "appendix study row 21",
+                "evidence": "26.2 (7.4-72)",
+                "confidence": 1
+              }
+            },
+            {
+              "name": "weight",
+              "unit": "kg",
+              "statistics": [
+                {
+                  "type": "range",
+                  "minimum": 25,
+                  "maximum": 101
+                }
+              ],
+              "categories": [],
+              "source": {
+                "status": "reported",
+                "source_locator": "appendix study row 21",
+                "evidence": "55.5 (25-101)",
+                "confidence": 1
+              }
+            }
+          ],
+          "pharmacogenetics": [],
+          "source": {
+            "status": "reported",
+            "source_locator": "appendix study row 21",
+            "evidence": "N: 40 (Chinese) Age: 26.2 (7.4-72) WT: 55.5 (25-101)",
+            "confidence": 1
+          }
+        }
+      ],
+      "assumptions": "Total N is the sum of separately reported cohorts; overlap was not reported.",
+      "source": {
+        "status": "reported",
+        "source_locator": "appendix study row 21",
+        "evidence": "Index N: 585 (Chinese) Age: 23.3 (1.2-85.1) WT: 53 (5-115) Validation N: 40 (Chinese) Age: 26.2 (7.4-72) WT: 55.5 (25-101)",
+        "confidence": 1
+      }
+    },
+    "route": "oral",
+    "n_subjects": 625,
+    "assay_unit": "mg/L",
+    "keywords": ["population pk", "antiseizure medicine", "AEDapt migration", "compartmental"],
+    "dataset_fingerprint": "pmid:12766553"
+  },
+  "confidence": {
+    "overall": 0.86,
+    "fields": {
+      "structure": 0.9,
+      "parameters": 0.9,
+      "population": 0.95
+    }
+  },
+  "provenance": {
+    "source_type": "legacy_curated_model",
+    "origin": "AEDapt",
+    "source_file": "CBZ_AP_JIAO.R",
+    "source_sha256": "e8814956dad879cbe157db83fd6c6aed786dc228801956e80dca451eae1c99a7",
+    "source_repository_included": false,
+    "reference_corpus_id": "aed_cbz_12766553_m01",
+    "pmid": "12766553",
+    "migration_method": "deterministic curated translation",
+    "corrections": ["Restored V/F=0.849*WT; AEDapt had substituted 1.5*WT.", "Corrected the AEDapt THETA7/THETA8 label and implementation swap.", "Retained OMEGA values as variances; no CV or SD reconversion."],
+    "assumptions": [],
+    "description": "Translated from the legacy AEDapt model definition. Published information was preferred over executable legacy code when they differed."
+  },
+  "qualification": {
+    "author_validated": false,
+    "curator": "LibeR AEDapt migration - independent review pending",
+    "clinical_use": [
+      {
+        "schema": "liberary.clinical_qualification",
+        "schema_version": "1.0.0",
+        "qualification_id": "cq-aedapt_cbz_jiao-candidate",
+        "version": "1.0.0",
+        "status": "candidate",
+        "scope": {
+          "drugs": "carbamazepine",
+          "analytes": "carbamazepine",
+          "metabolites": [],
+          "indications": ["epilepsy", "seizure disorder"],
+          "routes": "oral",
+          "formulations": [],
+          "regimens": [],
+          "endpoint_ids": [],
+          "endpoint_kinds": "therapeutic_range",
+          "population": {
+            "age": {
+              "min": 1.2,
+              "max": 85.1,
+              "unit": "years",
+              "required": true,
+              "hard": true,
+              "covariate": "AGE"
+            }
+          },
+          "covariates": {
+            "required": ["WT", "AGE", "DOSE_MG_KG_DAY"],
+            "optional": ["COMED_PHT", "COMED_PHB", "COMED_VPA_HIGH"],
+            "supported_imputation": [],
+            "ranges": []
+          },
+          "assays": {
+            "required": true,
+            "matrices": ["plasma", "serum"],
+            "methods": [],
+            "units": "mg/L"
+          }
+        },
+        "evidence": {
+          "source": "AEDapt legacy implementation plus AED PK/PD review corpus",
+          "computational_translation": "control-stream parse checked",
+          "clinical_validation": "not performed",
+          "model_sha256": "4eea9f0c71fdd8f9af3483eda1d6fef92f930a7764db8b4a0f2b9436e7b59366"
+        },
+        "governance": {
+          "issuer": "LibeR AEDapt migration",
+          "reviewer": "",
+          "valid_from": "2026-07-29T00:00:00Z",
+          "review_due": ""
+        },
+        "limitations": "Research candidate only; independent source verification and clinical qualification are required before patient-care use.",
+        "out_of_domain_rules": {
+          "reject_outside_age_range": true,
+          "reject_missing_required_covariates": true,
+          "require_qualified_status_for_automatic_selection": true
+        },
+        "supersedes": "",
+        "notes": "Migrated from AEDapt; catalogue availability is not clinical endorsement.",
+        "created_at": "2026-07-29T00:00:00Z",
+        "model": {
+          "library_id": "aedapt_cbz_jiao",
+          "version": "1.0.0",
+          "model_sha256": "4eea9f0c71fdd8f9af3483eda1d6fef92f930a7764db8b4a0f2b9436e7b59366",
+          "manifest_schema_version": "1.5.0"
+        }
+      }
+    ]
+  },
+  "relations": {
+    "same_compound": [],
+    "prior_version": [],
+    "mbma_pool": false
+  },
+  "created_at": "2026-07-29T00:00:00Z",
+  "updated_at": "2026-07-29T00:00:00Z"
+}

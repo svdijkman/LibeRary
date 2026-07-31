@@ -54,7 +54,9 @@ library_list <- function(status = NULL, root = library_catalog_root()) {
       ready = FALSE, blockers = "qualification_not_run"
     )
     clinical <- .library_current_clinical_records(
-      manifest$qualification$clinical_use %||% list()
+      .library_clinical_records_for_manifest(
+        manifest$qualification$clinical_use %||% list(), manifest
+      )
     )
     clinical_status <- unique(vapply(clinical, function(record) {
       as.character(record$status %||% "")

@@ -13,12 +13,121 @@
   if (is.na(hit)) "" else normalizePath(hit, winslash = "/", mustWork = TRUE)
 }
 
+.library_manifest_file <- function(path) {
+  manifest <- file.path(path, "manifest.json")
+  if (!file.exists(manifest)) return(NULL)
+  tryCatch(
+    jsonlite::fromJSON(manifest, simplifyVector = FALSE),
+    error = function(error) NULL
+  )
+}
+
+.library_version_is_newer <- function(candidate, current) {
+  candidate <- as.character(candidate %||% "")[[1L]]
+  current <- as.character(current %||% "")[[1L]]
+  if (!nzchar(candidate) || !nzchar(current)) return(FALSE)
+  isTRUE(tryCatch(
+    utils::compareVersion(candidate, current) > 0L,
+    error = function(error) FALSE
+  ))
+}
+
+.library_merge_clinical_history <- function(packaged, existing) {
+  prior <- existing$qualification$clinical_use %||% list()
+  current <- packaged$qualification$clinical_use %||% list()
+  current_ids <- vapply(current, function(record) {
+    as.character(record$qualification_id %||% "")
+  }, character(1))
+  retain <- Filter(function(record) {
+    id <- as.character(record$qualification_id %||% "")
+    !nzchar(id) || !id %in% current_ids
+  }, prior)
+  if (is.null(packaged$qualification)) packaged$qualification <- list()
+  packaged$qualification$clinical_use <- c(current, retain)
+  if (is.null(packaged$relations)) packaged$relations <- list()
+  packaged$relations$prior_version <- unique(c(
+    as.character(packaged$relations$prior_version %||% character()),
+    as.character(existing$version %||% "")
+  ))
+  packaged$relations$prior_version <-
+    packaged$relations$prior_version[nzchar(packaged$relations$prior_version)]
+  packaged
+}
+
+.library_archive_active_entry <- function(staged, manifest) {
+  version <- as.character(manifest$version %||% "unknown")[[1L]]
+  archive <- file.path(staged, "versions", version)
+  if (dir.exists(archive)) return(invisible(archive))
+  dir.create(archive, recursive = TRUE, showWarnings = FALSE)
+  artifact <- basename(as.character(
+    manifest$model$artifact %||% "model.ctl"
+  )[[1L]])
+  for (name in unique(c("manifest.json", artifact, "references.bib"))) {
+    source <- file.path(staged, name)
+    if (file.exists(source) &&
+        !file.copy(source, archive, overwrite = FALSE, copy.date = TRUE)) {
+      stop("Unable to archive prior packaged catalogue revision.", call. = FALSE)
+    }
+  }
+  for (name in c("extraction", "reproduction")) {
+    source <- file.path(staged, name)
+    destination <- file.path(archive, name)
+    if (dir.exists(source) && !dir.exists(destination)) {
+      .library_copy_tree(source, destination)
+    }
+  }
+  invisible(archive)
+}
+
+.library_activate_packaged_revision <- function(source, target, root) {
+  existing <- .library_manifest_file(target)
+  packaged <- .library_manifest_file(source)
+  if (is.null(existing) || is.null(packaged) ||
+      !.library_version_is_newer(packaged$version, existing$version)) {
+    return(FALSE)
+  }
+  staged <- file.path(
+    dirname(target),
+    paste0(".", basename(target), "-package-stage-", Sys.getpid(), "-",
+           sample.int(1e9, 1L))
+  )
+  .library_copy_tree(target, staged)
+  active <- TRUE
+  on.exit(
+    if (isTRUE(active)) unlink(staged, recursive = TRUE, force = TRUE),
+    add = TRUE
+  )
+  .library_archive_active_entry(staged, existing)
+  items <- list.files(
+    source, all.files = TRUE, no.. = TRUE, full.names = TRUE
+  )
+  items <- items[basename(items) != "versions"]
+  for (item in items) {
+    destination <- file.path(staged, basename(item))
+    unlink(destination, recursive = TRUE, force = TRUE)
+    if (!file.copy(
+      item, staged, recursive = TRUE, copy.date = TRUE
+    )) {
+      stop("Unable to stage newer packaged catalogue revision.", call. = FALSE)
+    }
+  }
+  activated <- .library_merge_clinical_history(
+    .library_manifest_file(staged), existing
+  )
+  .library_atomic_write(activated, file.path(staged, "manifest.json"))
+  .library_swap_catalog_entry(staged, target, root)
+  active <- FALSE
+  TRUE
+}
+
 #' Catalogue root directory
 #'
 #' The mutable catalogue lives in the user's application-data directory, so it
-#' survives upgrades and reinstalls. Packaged validated examples are seeded on
-#' first use. `options(LibeRary.catalog=)` or `LIBERARY_CATALOG` can select a
-#' shared or project-specific catalogue.
+#' survives upgrades and reinstalls. Packaged examples are seeded on first use;
+#' a newer packaged model revision transactionally replaces an older active
+#' seeded revision while retaining the prior files under `versions/`.
+#' `options(LibeRary.catalog=)` or `LIBERARY_CATALOG` can select a shared or
+#' project-specific catalogue.
 #' @param create Create and seed the catalogue when it does not exist.
 #' @return Normalized directory path.
 #' @examples
@@ -51,7 +160,15 @@ library_catalog_root <- function(create = TRUE) {
     sources <- list.dirs(file.path(packaged, "entries"), recursive = FALSE, full.names = TRUE)
     for (source in sources) {
       target <- file.path(entries, basename(source))
-      if (!dir.exists(target)) changed <- isTRUE(file.copy(source, entries, recursive = TRUE, copy.mode = TRUE)) || changed
+      if (!dir.exists(target)) {
+        changed <- isTRUE(file.copy(
+          source, entries, recursive = TRUE, copy.mode = TRUE
+        )) || changed
+      } else {
+        changed <- .library_activate_packaged_revision(
+          source, target, root
+        ) || changed
+      }
     }
   }
   if (changed || !file.exists(file.path(root, "index.json"))) .library_rebuild_index(root)

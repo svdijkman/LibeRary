@@ -1,0 +1,22 @@
+{
+  "schema": "liberary.aedapt_migration",
+  "schema_version": "1.0.0",
+  "library_id": "aedapt_phenytoin_yukawa",
+  "source": {
+    "application": "AEDapt",
+    "file": "PHT_AP_YUKAWA.R",
+    "sha256": "db37449f0143fe9dd51cb16377e34d8d2c2a8336c0035e6e8941a01f2c593312",
+    "author_label": "Yukawa"
+  },
+  "reference": {
+    "corpus_id": "aed-pkpd-reference",
+    "corpus_version": "0.2.2",
+    "reference_id": "aed_pht_2268899_m01",
+    "pmid": "2268899"
+  },
+  "decisions": {
+    "corrections": "Implemented the steady-state Michaelis-Menten relationship as a dynamic ODE and retained the reported dose-dependent powder formulation bioavailability.",
+    "assumptions": ["V=1.23*WT and its variance were borrowed by AEDapt from Odani et al.", "KA=10 h^-1 was an AEDapt generated default; both are fixed except the borrowed V variability."],
+    "clinical_status": "candidate"
+  }
+}

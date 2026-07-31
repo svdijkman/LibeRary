@@ -1,0 +1,253 @@
+{
+  "schema_version": "1.5.0",
+  "library_id": "aedapt_lamotrigine_rivas",
+  "version": "1.0.0",
+  "status": "review",
+  "title": "Lamotrigine population PK - Rivas et al.",
+  "model": {
+    "artifact": "model.ctl",
+    "advan": 2,
+    "trans": 2,
+    "type": "pk",
+    "use_ode": false,
+    "generated_suggestion": true,
+    "mapping_review_required": true
+  },
+  "study": {
+    "compound": "lamotrigine",
+    "population": "German: N:497 Age: 39 (32-49) WT: 76 (65-85) Spanish: N: 103 Age: 38 (26.8-51.3) WT: 70 (61.8-77)",
+    "population_details": {
+      "raw": "German: N:497 Age: 39 (32-49) WT: 76 (65-85) Spanish: N: 103 Age: 38 (26.8-51.3) WT: 70 (61.8-77)",
+      "n_total": 600,
+      "cohorts": [
+        {
+          "id": "cohort_1",
+          "label": "cohort_1",
+          "role": "unspecified",
+          "n": {
+            "enrolled": null,
+            "dosed": null,
+            "analysed": 497
+          },
+          "health_status": "unspecified",
+          "country": null,
+          "descriptors": [
+            {
+              "name": "age",
+              "unit": "years",
+              "statistics": [
+                {
+                  "type": "range",
+                  "minimum": 32,
+                  "maximum": 49
+                }
+              ],
+              "categories": [],
+              "source": {
+                "status": "reported",
+                "source_locator": "appendix study row 15",
+                "evidence": "39 (32-49)",
+                "confidence": 1
+              }
+            },
+            {
+              "name": "weight",
+              "unit": "kg",
+              "statistics": [
+                {
+                  "type": "range",
+                  "minimum": 65,
+                  "maximum": 85
+                }
+              ],
+              "categories": [],
+              "source": {
+                "status": "reported",
+                "source_locator": "appendix study row 15",
+                "evidence": "76 (65-85) Spanish:",
+                "confidence": 1
+              }
+            }
+          ],
+          "pharmacogenetics": [],
+          "source": {
+            "status": "reported",
+            "source_locator": "appendix study row 15",
+            "evidence": "N:497 Age: 39 (32-49) WT: 76 (65-85) Spanish:",
+            "confidence": 1
+          }
+        },
+        {
+          "id": "cohort_2",
+          "label": "cohort_2",
+          "role": "unspecified",
+          "n": {
+            "enrolled": null,
+            "dosed": null,
+            "analysed": 103
+          },
+          "health_status": "unspecified",
+          "country": null,
+          "descriptors": [
+            {
+              "name": "age",
+              "unit": "years",
+              "statistics": [
+                {
+                  "type": "range",
+                  "minimum": 26.8,
+                  "maximum": 51.3
+                }
+              ],
+              "categories": [],
+              "source": {
+                "status": "reported",
+                "source_locator": "appendix study row 15",
+                "evidence": "38 (26.8-51.3)",
+                "confidence": 1
+              }
+            },
+            {
+              "name": "weight",
+              "unit": "kg",
+              "statistics": [
+                {
+                  "type": "range",
+                  "minimum": 61.8,
+                  "maximum": 77
+                }
+              ],
+              "categories": [],
+              "source": {
+                "status": "reported",
+                "source_locator": "appendix study row 15",
+                "evidence": "70 (61.8-77)",
+                "confidence": 1
+              }
+            }
+          ],
+          "pharmacogenetics": [],
+          "source": {
+            "status": "reported",
+            "source_locator": "appendix study row 15",
+            "evidence": "N: 103 Age: 38 (26.8-51.3) WT: 70 (61.8-77)",
+            "confidence": 1
+          }
+        }
+      ],
+      "assumptions": "Total N is the sum of separately reported cohorts; overlap was not reported.",
+      "source": {
+        "status": "reported",
+        "source_locator": "appendix study row 15",
+        "evidence": "German: N:497 Age: 39 (32-49) WT: 76 (65-85) Spanish: N: 103 Age: 38 (26.8-51.3) WT: 70 (61.8-77)",
+        "confidence": 1
+      }
+    },
+    "route": "oral",
+    "n_subjects": 600,
+    "assay_unit": "mg/L",
+    "keywords": ["population pk", "antiseizure medicine", "AEDapt migration", "compartmental"],
+    "dataset_fingerprint": "pmid:18641550"
+  },
+  "confidence": {
+    "overall": 0.86,
+    "fields": {
+      "structure": 0.9,
+      "parameters": 0.9,
+      "population": 0.95
+    }
+  },
+  "provenance": {
+    "source_type": "legacy_curated_model",
+    "origin": "AEDapt",
+    "source_file": "LMT_A_RIVAS.R",
+    "source_sha256": "ca680efd7ddf542ff110ea112f49879fb6a55c40f258fa93a55a5f181cc1c3c9",
+    "source_repository_included": false,
+    "reference_corpus_id": "aed_lmt_18641550_m01",
+    "pmid": "18641550",
+    "migration_method": "deterministic curated translation",
+    "corrections": "Restored the individual comedication effects that were overwritten by a second TVCL assignment in AEDapt.",
+    "assumptions": [],
+    "description": "Translated from the legacy AEDapt model definition. Published information was preferred over executable legacy code when they differed."
+  },
+  "qualification": {
+    "author_validated": false,
+    "curator": "LibeR AEDapt migration - independent review pending",
+    "clinical_use": [
+      {
+        "schema": "liberary.clinical_qualification",
+        "schema_version": "1.0.0",
+        "qualification_id": "cq-aedapt_lamotrigine_rivas-candidate",
+        "version": "1.0.0",
+        "status": "candidate",
+        "scope": {
+          "drugs": "lamotrigine",
+          "analytes": "lamotrigine",
+          "metabolites": [],
+          "indications": ["epilepsy", "seizure disorder"],
+          "routes": "oral",
+          "formulations": [],
+          "regimens": [],
+          "endpoint_ids": [],
+          "endpoint_kinds": "therapeutic_range",
+          "population": {
+            "age": {
+              "min": 16,
+              "max": 68,
+              "unit": "years",
+              "required": true,
+              "hard": true,
+              "covariate": "AGE"
+            }
+          },
+          "covariates": {
+            "required": "WT",
+            "optional": ["COMED_VPA", "COMED_PHT", "COMED_PHB", "COMED_CBZ"],
+            "supported_imputation": [],
+            "ranges": []
+          },
+          "assays": {
+            "required": true,
+            "matrices": ["plasma", "serum"],
+            "methods": [],
+            "units": "mg/L"
+          }
+        },
+        "evidence": {
+          "source": "AEDapt legacy implementation plus AED PK/PD review corpus",
+          "computational_translation": "control-stream parse checked",
+          "clinical_validation": "not performed",
+          "model_sha256": "c0ac1d809522f4908fd047ec4754c318a85c8e376d65577df33f56c3d00dbd6b"
+        },
+        "governance": {
+          "issuer": "LibeR AEDapt migration",
+          "reviewer": "",
+          "valid_from": "2026-07-29T00:00:00Z",
+          "review_due": ""
+        },
+        "limitations": "Research candidate only; independent source verification and clinical qualification are required before patient-care use.",
+        "out_of_domain_rules": {
+          "reject_outside_age_range": true,
+          "reject_missing_required_covariates": true,
+          "require_qualified_status_for_automatic_selection": true
+        },
+        "supersedes": "",
+        "notes": "Migrated from AEDapt; catalogue availability is not clinical endorsement.",
+        "created_at": "2026-07-29T00:00:00Z",
+        "model": {
+          "library_id": "aedapt_lamotrigine_rivas",
+          "version": "1.0.0",
+          "model_sha256": "c0ac1d809522f4908fd047ec4754c318a85c8e376d65577df33f56c3d00dbd6b",
+          "manifest_schema_version": "1.5.0"
+        }
+      }
+    ]
+  },
+  "relations": {
+    "same_compound": [],
+    "prior_version": [],
+    "mbma_pool": false
+  },
+  "created_at": "2026-07-29T00:00:00Z",
+  "updated_at": "2026-07-29T00:00:00Z"
+}

@@ -1,0 +1,201 @@
+{
+  "schema_version": "1.5.0",
+  "library_id": "aedapt_phenytoin_odani",
+  "version": "1.0.0",
+  "status": "review",
+  "title": "Phenytoin nonlinear population PK - Odani et al.",
+  "model": {
+    "artifact": "model.ctl",
+    "advan": 13,
+    "trans": 1,
+    "type": "nonlinear_pk",
+    "use_ode": true,
+    "generated_suggestion": true,
+    "mapping_review_required": true
+  },
+  "study": {
+    "compound": "phenytoin",
+    "population": "N: 116 (Japanese) Age: 15.6±6.6 (1-37) WT: 42.4±16.5",
+    "population_details": {
+      "raw": "N: 116 (Japanese) Age: 15.6±6.6 (1-37) WT: 42.4±16.5",
+      "n_total": 116,
+      "cohorts": [
+        {
+          "id": "overall",
+          "label": "overall",
+          "role": "unspecified",
+          "n": {
+            "enrolled": null,
+            "dosed": null,
+            "analysed": 116
+          },
+          "health_status": "unspecified",
+          "country": null,
+          "descriptors": [
+            {
+              "name": "age",
+              "unit": "years",
+              "statistics": [
+                {
+                  "type": "mean_sd",
+                  "mean": 15.6,
+                  "sd": 6.6
+                },
+                {
+                  "type": "range",
+                  "minimum": 1,
+                  "maximum": 37
+                }
+              ],
+              "categories": [],
+              "source": {
+                "status": "reported",
+                "source_locator": "appendix study row 32",
+                "evidence": "15.6±6.6 (1-37)",
+                "confidence": 1
+              }
+            },
+            {
+              "name": "weight",
+              "unit": "kg",
+              "statistics": [
+                {
+                  "type": "mean_sd",
+                  "mean": 42.4,
+                  "sd": 16.5
+                }
+              ],
+              "categories": [],
+              "source": {
+                "status": "reported",
+                "source_locator": "appendix study row 32",
+                "evidence": "42.4±16.5",
+                "confidence": 1
+              }
+            }
+          ],
+          "pharmacogenetics": [],
+          "source": {
+            "status": "reported",
+            "source_locator": "appendix study row 32",
+            "evidence": "N: 116 (Japanese) Age: 15.6±6.6 (1-37) WT: 42.4±16.5",
+            "confidence": 1
+          }
+        }
+      ],
+      "assumptions": [],
+      "source": {
+        "status": "reported",
+        "source_locator": "appendix study row 32",
+        "evidence": "N: 116 (Japanese) Age: 15.6±6.6 (1-37) WT: 42.4±16.5",
+        "confidence": 1
+      }
+    },
+    "route": "oral",
+    "n_subjects": 116,
+    "assay_unit": "mg/L",
+    "keywords": ["population pk", "antiseizure medicine", "AEDapt migration", "nonlinear elimination"],
+    "dataset_fingerprint": "pmid:8924916"
+  },
+  "confidence": {
+    "overall": 0.72,
+    "fields": {
+      "structure": 0.7,
+      "parameters": 0.9,
+      "population": 0.95
+    }
+  },
+  "provenance": {
+    "source_type": "legacy_curated_model",
+    "origin": "AEDapt",
+    "source_file": "PHT_AP_ODANI.R",
+    "source_sha256": "51a46e13bd863cfeb86037222bf887be04306e05da300bc38e16532c3c77680f",
+    "source_repository_included": false,
+    "reference_corpus_id": "aed_pht_8924916_m01",
+    "pmid": "8924916",
+    "migration_method": "deterministic curated translation",
+    "corrections": "Implemented the reported Michaelis-Menten elimination dynamically rather than treating dose-dependent steady-state clearance as constant.",
+    "assumptions": "KA=10 h^-1 was retained as a fixed AEDapt assumption; it was not reported.",
+    "description": "Translated from the legacy AEDapt model definition. Published information was preferred over executable legacy code when they differed."
+  },
+  "qualification": {
+    "author_validated": false,
+    "curator": "LibeR AEDapt migration - independent review pending",
+    "clinical_use": [
+      {
+        "schema": "liberary.clinical_qualification",
+        "schema_version": "1.0.0",
+        "qualification_id": "cq-aedapt_phenytoin_odani-candidate",
+        "version": "1.0.0",
+        "status": "candidate",
+        "scope": {
+          "drugs": "phenytoin",
+          "analytes": "phenytoin",
+          "metabolites": [],
+          "indications": ["epilepsy", "seizure disorder"],
+          "routes": "oral",
+          "formulations": [],
+          "regimens": [],
+          "endpoint_ids": [],
+          "endpoint_kinds": "therapeutic_range",
+          "population": {
+            "age": {
+              "min": 4,
+              "max": 79,
+              "unit": "years",
+              "required": true,
+              "hard": true,
+              "covariate": "AGE"
+            }
+          },
+          "covariates": {
+            "required": "WT",
+            "optional": "COMED_ZNS",
+            "supported_imputation": [],
+            "ranges": []
+          },
+          "assays": {
+            "required": true,
+            "matrices": ["plasma", "serum"],
+            "methods": [],
+            "units": "mg/L"
+          }
+        },
+        "evidence": {
+          "source": "AEDapt legacy implementation plus AED PK/PD review corpus",
+          "computational_translation": "control-stream parse checked",
+          "clinical_validation": "not performed",
+          "model_sha256": "c1e70f8cafb49e65958dfe74e1711768d6b08c31e909c1d3d49dc6994f2df61c"
+        },
+        "governance": {
+          "issuer": "LibeR AEDapt migration",
+          "reviewer": "",
+          "valid_from": "2026-07-29T00:00:00Z",
+          "review_due": ""
+        },
+        "limitations": ["Research candidate only; independent source verification and clinical qualification are required before patient-care use.", "KA=10 h^-1 was retained as a fixed AEDapt assumption; it was not reported."],
+        "out_of_domain_rules": {
+          "reject_outside_age_range": true,
+          "reject_missing_required_covariates": true,
+          "require_qualified_status_for_automatic_selection": true
+        },
+        "supersedes": "",
+        "notes": "Migrated from AEDapt; catalogue availability is not clinical endorsement.",
+        "created_at": "2026-07-29T00:00:00Z",
+        "model": {
+          "library_id": "aedapt_phenytoin_odani",
+          "version": "1.0.0",
+          "model_sha256": "c1e70f8cafb49e65958dfe74e1711768d6b08c31e909c1d3d49dc6994f2df61c",
+          "manifest_schema_version": "1.5.0"
+        }
+      }
+    ]
+  },
+  "relations": {
+    "same_compound": [],
+    "prior_version": [],
+    "mbma_pool": false
+  },
+  "created_at": "2026-07-29T00:00:00Z",
+  "updated_at": "2026-07-29T00:00:00Z"
+}

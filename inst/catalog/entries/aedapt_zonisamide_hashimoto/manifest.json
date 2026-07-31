@@ -1,0 +1,196 @@
+{
+  "schema_version": "1.5.0",
+  "library_id": "aedapt_zonisamide_hashimoto",
+  "version": "1.0.0",
+  "status": "review",
+  "title": "Zonisamide nonlinear population PK - Hashimoto et al.",
+  "model": {
+    "artifact": "model.ctl",
+    "advan": 13,
+    "trans": 1,
+    "type": "nonlinear_pk",
+    "use_ode": true,
+    "generated_suggestion": true,
+    "mapping_review_required": true
+  },
+  "study": {
+    "compound": "zonisamide",
+    "population": "N: 68 (Japan) Age: 11.2 ± 6.4 WT: 33.4 ± 17.7",
+    "population_details": {
+      "raw": "N: 68 (Japan) Age: 11.2 ± 6.4 WT: 33.4 ± 17.7",
+      "n_total": 68,
+      "cohorts": [
+        {
+          "id": "overall",
+          "label": "overall",
+          "role": "unspecified",
+          "n": {
+            "enrolled": null,
+            "dosed": null,
+            "analysed": 68
+          },
+          "health_status": "unspecified",
+          "country": null,
+          "descriptors": [
+            {
+              "name": "age",
+              "unit": "years",
+              "statistics": [
+                {
+                  "type": "mean_sd",
+                  "mean": 11.2,
+                  "sd": 6.4
+                }
+              ],
+              "categories": [],
+              "source": {
+                "status": "reported",
+                "source_locator": "appendix study row 5",
+                "evidence": "11.2 ± 6.4",
+                "confidence": 1
+              }
+            },
+            {
+              "name": "weight",
+              "unit": "kg",
+              "statistics": [
+                {
+                  "type": "mean_sd",
+                  "mean": 33.4,
+                  "sd": 17.7
+                }
+              ],
+              "categories": [],
+              "source": {
+                "status": "reported",
+                "source_locator": "appendix study row 5",
+                "evidence": "33.4 ± 17.7",
+                "confidence": 1
+              }
+            }
+          ],
+          "pharmacogenetics": [],
+          "source": {
+            "status": "reported",
+            "source_locator": "appendix study row 5",
+            "evidence": "N: 68 (Japan) Age: 11.2 ± 6.4 WT: 33.4 ± 17.7",
+            "confidence": 1
+          }
+        }
+      ],
+      "assumptions": [],
+      "source": {
+        "status": "reported",
+        "source_locator": "appendix study row 5",
+        "evidence": "N: 68 (Japan) Age: 11.2 ± 6.4 WT: 33.4 ± 17.7",
+        "confidence": 1
+      }
+    },
+    "route": "oral",
+    "n_subjects": 68,
+    "assay_unit": "mg/L",
+    "keywords": ["population pk", "antiseizure medicine", "AEDapt migration", "nonlinear elimination"],
+    "dataset_fingerprint": "pmid:8205132"
+  },
+  "confidence": {
+    "overall": 0.72,
+    "fields": {
+      "structure": 0.7,
+      "parameters": 0.9,
+      "population": 0.95
+    }
+  },
+  "provenance": {
+    "source_type": "legacy_curated_model",
+    "origin": "AEDapt",
+    "source_file": "ZNS_AP_HASHIMOTO.R",
+    "source_sha256": "d9ef292260f64cf985f53a95c3406cd8ee35b346aca33dccb51d04a59df329d5",
+    "source_repository_included": false,
+    "reference_corpus_id": "aed_zns_8205132_m01",
+    "pmid": "8205132",
+    "migration_method": "deterministic curated translation",
+    "corrections": "Restored the reported normal ETA on KM and implemented Michaelis-Menten elimination dynamically; AEDapt approximated a dose-dependent linear clearance.",
+    "assumptions": "KA=2 h^-1 was added as a fixed generated default for dynamic oral dosing.",
+    "description": "Translated from the legacy AEDapt model definition. Published information was preferred over executable legacy code when they differed."
+  },
+  "qualification": {
+    "author_validated": false,
+    "curator": "LibeR AEDapt migration - independent review pending",
+    "clinical_use": [
+      {
+        "schema": "liberary.clinical_qualification",
+        "schema_version": "1.0.0",
+        "qualification_id": "cq-aedapt_zonisamide_hashimoto-candidate",
+        "version": "1.0.0",
+        "status": "candidate",
+        "scope": {
+          "drugs": "zonisamide",
+          "analytes": "zonisamide",
+          "metabolites": [],
+          "indications": ["epilepsy", "seizure disorder"],
+          "routes": "oral",
+          "formulations": [],
+          "regimens": [],
+          "endpoint_ids": [],
+          "endpoint_kinds": "therapeutic_range",
+          "population": {
+            "age": {
+              "min": 4,
+              "max": 79,
+              "unit": "years",
+              "required": true,
+              "hard": true,
+              "covariate": "AGE"
+            }
+          },
+          "covariates": {
+            "required": "WT",
+            "optional": "COMED_CBZ",
+            "supported_imputation": [],
+            "ranges": []
+          },
+          "assays": {
+            "required": true,
+            "matrices": ["plasma", "serum"],
+            "methods": [],
+            "units": "mg/L"
+          }
+        },
+        "evidence": {
+          "source": "AEDapt legacy implementation plus AED PK/PD review corpus",
+          "computational_translation": "control-stream parse checked",
+          "clinical_validation": "not performed",
+          "model_sha256": "c7d101b6767023db93e3ef6688ad7afe559422e59e89676da3556f4259ff6834"
+        },
+        "governance": {
+          "issuer": "LibeR AEDapt migration",
+          "reviewer": "",
+          "valid_from": "2026-07-29T00:00:00Z",
+          "review_due": ""
+        },
+        "limitations": ["Research candidate only; independent source verification and clinical qualification are required before patient-care use.", "KA=2 h^-1 was added as a fixed generated default for dynamic oral dosing."],
+        "out_of_domain_rules": {
+          "reject_outside_age_range": true,
+          "reject_missing_required_covariates": true,
+          "require_qualified_status_for_automatic_selection": true
+        },
+        "supersedes": "",
+        "notes": "Migrated from AEDapt; catalogue availability is not clinical endorsement.",
+        "created_at": "2026-07-29T00:00:00Z",
+        "model": {
+          "library_id": "aedapt_zonisamide_hashimoto",
+          "version": "1.0.0",
+          "model_sha256": "c7d101b6767023db93e3ef6688ad7afe559422e59e89676da3556f4259ff6834",
+          "manifest_schema_version": "1.5.0"
+        }
+      }
+    ]
+  },
+  "relations": {
+    "same_compound": [],
+    "prior_version": [],
+    "mbma_pool": false
+  },
+  "created_at": "2026-07-29T00:00:00Z",
+  "updated_at": "2026-07-29T00:00:00Z"
+}

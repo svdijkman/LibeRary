@@ -223,6 +223,14 @@ print.library_clinical_qualification <- function(x, ...) {
   }, logical(1))]
 }
 
+.library_clinical_records_for_manifest <- function(records, manifest) {
+  version <- as.character(manifest$version %||% "")[[1L]]
+  Filter(function(record) {
+    bound <- as.character(record$model$version %||% "")[[1L]]
+    !nzchar(bound) || identical(bound, version)
+  }, records %||% list())
+}
+
 .library_clinical_review_overdue <- function(record) {
   due <- as.character(record$governance$review_due %||% "")[[1L]]
   if (!nzchar(due)) return(FALSE)
@@ -301,7 +309,9 @@ library_clinical_qualifications <- function(
   output <- list()
   for (id in ids) {
     manifest <- .library_read_manifest(id, root)
-    records <- manifest$qualification$clinical_use %||% list()
+    records <- .library_clinical_records_for_manifest(
+      manifest$qualification$clinical_use %||% list(), manifest
+    )
     if (isTRUE(current)) records <- .library_current_clinical_records(records)
     for (record in records) {
       record <- library_clinical_qualification_validate(record)

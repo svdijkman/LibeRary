@@ -1,0 +1,22 @@
+{
+  "schema": "liberary.aedapt_migration",
+  "schema_version": "1.0.0",
+  "library_id": "aedapt_levetiracetam_toublanc",
+  "source": {
+    "application": "AEDapt",
+    "file": "LVT_AP_TOUBLANC.R",
+    "sha256": "efa5b7f04c42331a2e6111de926746e3d35ce3aba77b2b2934de73b4d25bce10",
+    "author_label": "Toublanc"
+  },
+  "reference": {
+    "corpus_id": "aed-pkpd-reference",
+    "corpus_version": "0.2.2",
+    "reference_id": "aed_lvt_23877106_m01",
+    "pmid": "23877106"
+  },
+  "decisions": {
+    "corrections": "Rebuilt the CL/V covariance as the reported 0.00328 NONMEM covariance; AEDapt square-rooted matrix elements before covariance simulation.",
+    "assumptions": [],
+    "clinical_status": "candidate"
+  }
+}

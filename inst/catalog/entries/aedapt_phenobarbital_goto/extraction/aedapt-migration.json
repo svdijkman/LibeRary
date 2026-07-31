@@ -1,0 +1,22 @@
+{
+  "schema": "liberary.aedapt_migration",
+  "schema_version": "1.0.0",
+  "library_id": "aedapt_phenobarbital_goto",
+  "source": {
+    "application": "AEDapt",
+    "file": "PHB_AP_GOTO.R",
+    "sha256": "cdda7ae5bda3ecefe1e12f58b794d2fd23fd68632ac47688292e33fd834fd11c",
+    "author_label": "Goto"
+  },
+  "reference": {
+    "corpus_id": "aed-pkpd-reference",
+    "corpus_version": "0.2.2",
+    "reference_id": "aed_phb_17304159_m01",
+    "pmid": "17304159"
+  },
+  "decisions": {
+    "corrections": "Restored CYP2C9 and severe-disability covariate effects omitted by AEDapt.",
+    "assumptions": "KA=2 h^-1 was retained as a fixed generated default because it was not reported.",
+    "clinical_status": "candidate"
+  }
+}

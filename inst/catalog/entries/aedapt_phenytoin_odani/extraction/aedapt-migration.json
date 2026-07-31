@@ -1,0 +1,22 @@
+{
+  "schema": "liberary.aedapt_migration",
+  "schema_version": "1.0.0",
+  "library_id": "aedapt_phenytoin_odani",
+  "source": {
+    "application": "AEDapt",
+    "file": "PHT_AP_ODANI.R",
+    "sha256": "51a46e13bd863cfeb86037222bf887be04306e05da300bc38e16532c3c77680f",
+    "author_label": "Odani"
+  },
+  "reference": {
+    "corpus_id": "aed-pkpd-reference",
+    "corpus_version": "0.2.2",
+    "reference_id": "aed_pht_8924916_m01",
+    "pmid": "8924916"
+  },
+  "decisions": {
+    "corrections": "Implemented the reported Michaelis-Menten elimination dynamically rather than treating dose-dependent steady-state clearance as constant.",
+    "assumptions": "KA=10 h^-1 was retained as a fixed AEDapt assumption; it was not reported.",
+    "clinical_status": "candidate"
+  }
+}

@@ -14,9 +14,11 @@ Normalized directory path.
 }
 \description{
 The mutable catalogue lives in the user's application-data directory, so it
-survives upgrades and reinstalls. Packaged validated examples are seeded on
-first use. \code{options(LibeRary.catalog=)} or \code{LIBERARY_CATALOG} can select a
-shared or project-specific catalogue.
+survives upgrades and reinstalls. Packaged examples are seeded on first use;
+a newer packaged model revision transactionally replaces an older active
+seeded revision while retaining the prior files under \verb{versions/}.
+\code{options(LibeRary.catalog=)} or \code{LIBERARY_CATALOG} can select a shared or
+project-specific catalogue.
 }
 \examples{
 root <- tempfile("liberary-catalog-")

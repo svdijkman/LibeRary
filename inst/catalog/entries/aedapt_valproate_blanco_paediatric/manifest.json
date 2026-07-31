@@ -1,0 +1,196 @@
+{
+  "schema_version": "1.5.0",
+  "library_id": "aedapt_valproate_blanco_paediatric",
+  "version": "1.0.0",
+  "status": "review",
+  "title": "Valproate paediatric population PK - Blanco et al.",
+  "model": {
+    "artifact": "model.ctl",
+    "advan": 2,
+    "trans": 2,
+    "type": "pk",
+    "use_ode": false,
+    "generated_suggestion": true,
+    "mapping_review_required": true
+  },
+  "study": {
+    "compound": "valproate",
+    "population": "Obs: 770 N: 255 Sex: m=128, f=127 Age: 7.8 (0.1-14) WT: 31.3 (4.0-74)",
+    "population_details": {
+      "raw": "Obs: 770 N: 255 Sex: m=128, f=127 Age: 7.8 (0.1-14) WT: 31.3 (4.0-74)",
+      "n_total": 255,
+      "cohorts": [
+        {
+          "id": "overall",
+          "label": "overall",
+          "role": "unspecified",
+          "n": {
+            "enrolled": null,
+            "dosed": null,
+            "analysed": 255
+          },
+          "health_status": "unspecified",
+          "country": null,
+          "descriptors": [
+            {
+              "name": "age",
+              "unit": "years",
+              "statistics": [
+                {
+                  "type": "range",
+                  "minimum": 0.1,
+                  "maximum": 14
+                }
+              ],
+              "categories": [],
+              "source": {
+                "status": "reported",
+                "source_locator": "appendix study row 27",
+                "evidence": "7.8 (0.1-14)",
+                "confidence": 1
+              }
+            },
+            {
+              "name": "weight",
+              "unit": "kg",
+              "statistics": [
+                {
+                  "type": "range",
+                  "minimum": 4,
+                  "maximum": 74
+                }
+              ],
+              "categories": [],
+              "source": {
+                "status": "reported",
+                "source_locator": "appendix study row 27",
+                "evidence": "31.3 (4.0-74)",
+                "confidence": 1
+              }
+            }
+          ],
+          "pharmacogenetics": [],
+          "source": {
+            "status": "reported",
+            "source_locator": "appendix study row 27",
+            "evidence": "N: 255 Sex: m=128, f=127 Age: 7.8 (0.1-14) WT: 31.3 (4.0-74)",
+            "confidence": 1
+          }
+        }
+      ],
+      "assumptions": [],
+      "source": {
+        "status": "reported",
+        "source_locator": "appendix study row 27",
+        "evidence": "Obs: 770 N: 255 Sex: m=128, f=127 Age: 7.8 (0.1-14) WT: 31.3 (4.0-74)",
+        "confidence": 1
+      }
+    },
+    "route": "oral",
+    "n_subjects": 255,
+    "assay_unit": "mg/L",
+    "keywords": ["population pk", "antiseizure medicine", "AEDapt migration", "compartmental"],
+    "dataset_fingerprint": "pmid:10319910"
+  },
+  "confidence": {
+    "overall": 0.86,
+    "fields": {
+      "structure": 0.9,
+      "parameters": 0.9,
+      "population": 0.95
+    }
+  },
+  "provenance": {
+    "source_type": "legacy_curated_model",
+    "origin": "AEDapt",
+    "source_file": "VPA_P_BLANCO.R",
+    "source_sha256": "3c7d373781c4d9d8125a37f079ed82cf0a841862e6132bc475de8d2c5a02d0c0",
+    "source_repository_included": false,
+    "reference_corpus_id": "aed_vpa_10319910_m01",
+    "pmid": "10319910",
+    "migration_method": "deterministic curated translation",
+    "corrections": "Restored the reported carbamazepine multiplicative factor (1.359^indicator).",
+    "assumptions": [],
+    "description": "Translated from the legacy AEDapt model definition. Published information was preferred over executable legacy code when they differed."
+  },
+  "qualification": {
+    "author_validated": false,
+    "curator": "LibeR AEDapt migration - independent review pending",
+    "clinical_use": [
+      {
+        "schema": "liberary.clinical_qualification",
+        "schema_version": "1.0.0",
+        "qualification_id": "cq-aedapt_valproate_blanco_paediatric-candidate",
+        "version": "1.0.0",
+        "status": "candidate",
+        "scope": {
+          "drugs": "valproate",
+          "analytes": "valproate",
+          "metabolites": [],
+          "indications": ["epilepsy", "seizure disorder"],
+          "routes": "oral",
+          "formulations": [],
+          "regimens": [],
+          "endpoint_ids": [],
+          "endpoint_kinds": "therapeutic_range",
+          "population": {
+            "age": {
+              "min": 0.2,
+              "max": 15,
+              "unit": "years",
+              "required": true,
+              "hard": true,
+              "covariate": "AGE"
+            }
+          },
+          "covariates": {
+            "required": ["WT", "DOSE_MG_KG_DAY"],
+            "optional": "COMED_CBZ",
+            "supported_imputation": [],
+            "ranges": []
+          },
+          "assays": {
+            "required": true,
+            "matrices": ["plasma", "serum"],
+            "methods": [],
+            "units": "mg/L"
+          }
+        },
+        "evidence": {
+          "source": "AEDapt legacy implementation plus AED PK/PD review corpus",
+          "computational_translation": "control-stream parse checked",
+          "clinical_validation": "not performed",
+          "model_sha256": "7d8d658a358087027da86159a01edff3846793a91cdb1edeb9d2329bac3337b8"
+        },
+        "governance": {
+          "issuer": "LibeR AEDapt migration",
+          "reviewer": "",
+          "valid_from": "2026-07-29T00:00:00Z",
+          "review_due": ""
+        },
+        "limitations": "Research candidate only; independent source verification and clinical qualification are required before patient-care use.",
+        "out_of_domain_rules": {
+          "reject_outside_age_range": true,
+          "reject_missing_required_covariates": true,
+          "require_qualified_status_for_automatic_selection": true
+        },
+        "supersedes": "",
+        "notes": "Migrated from AEDapt; catalogue availability is not clinical endorsement.",
+        "created_at": "2026-07-29T00:00:00Z",
+        "model": {
+          "library_id": "aedapt_valproate_blanco_paediatric",
+          "version": "1.0.0",
+          "model_sha256": "7d8d658a358087027da86159a01edff3846793a91cdb1edeb9d2329bac3337b8",
+          "manifest_schema_version": "1.5.0"
+        }
+      }
+    ]
+  },
+  "relations": {
+    "same_compound": [],
+    "prior_version": [],
+    "mbma_pool": false
+  },
+  "created_at": "2026-07-29T00:00:00Z",
+  "updated_at": "2026-07-29T00:00:00Z"
+}

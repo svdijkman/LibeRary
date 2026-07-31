@@ -1,0 +1,22 @@
+{
+  "schema": "liberary.aedapt_migration",
+  "schema_version": "1.0.0",
+  "library_id": "aedapt_valproate_blanco_paediatric",
+  "source": {
+    "application": "AEDapt",
+    "file": "VPA_P_BLANCO.R",
+    "sha256": "3c7d373781c4d9d8125a37f079ed82cf0a841862e6132bc475de8d2c5a02d0c0",
+    "author_label": "Blanco"
+  },
+  "reference": {
+    "corpus_id": "aed-pkpd-reference",
+    "corpus_version": "0.2.2",
+    "reference_id": "aed_vpa_10319910_m01",
+    "pmid": "10319910"
+  },
+  "decisions": {
+    "corrections": "Restored the reported carbamazepine multiplicative factor (1.359^indicator).",
+    "assumptions": [],
+    "clinical_status": "candidate"
+  }
+}

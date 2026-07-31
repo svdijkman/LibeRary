@@ -1,0 +1,22 @@
+{
+  "schema": "liberary.aedapt_migration",
+  "schema_version": "1.0.0",
+  "library_id": "aedapt_valproate_blanco_adult",
+  "source": {
+    "application": "AEDapt",
+    "file": "VPA_A_BLANCO.R",
+    "sha256": "bdeb7ed05a4a4fe66b3261cd25a311cbee0f433ee50a9de9cb7b54c4ea19306f",
+    "author_label": "Blanco"
+  },
+  "reference": {
+    "corpus_id": "aed-pkpd-reference",
+    "corpus_version": "0.2.2",
+    "reference_id": "aed_vpa_10594867_m01",
+    "pmid": "10594867"
+  },
+  "decisions": {
+    "corrections": "Restored the reported multiplicative comedication factors; AEDapt had implemented them as 1+effect.",
+    "assumptions": [],
+    "clinical_status": "candidate"
+  }
+}

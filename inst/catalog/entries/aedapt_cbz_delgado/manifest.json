@@ -1,0 +1,253 @@
+{
+  "schema_version": "1.5.0",
+  "library_id": "aedapt_cbz_delgado",
+  "version": "1.0.0",
+  "status": "review",
+  "title": "Carbamazepine population PK - Delgado et al.",
+  "model": {
+    "artifact": "model.ctl",
+    "advan": 2,
+    "trans": 2,
+    "type": "pk",
+    "use_ode": false,
+    "generated_suggestion": true,
+    "mapping_review_required": true
+  },
+  "study": {
+    "compound": "carbamazepine",
+    "population": "Initial N: 201 (Spain) Age: 9.5 (1 – 14) WT: 35 (9-78) Validation N: 74 (Spain) Age: 9.8 (1-14) WT: 39.8 (11-70)",
+    "population_details": {
+      "raw": "Initial N: 201 (Spain) Age: 9.5 (1 – 14) WT: 35 (9-78) Validation N: 74 (Spain) Age: 9.8 (1-14) WT: 39.8 (11-70)",
+      "n_total": 275,
+      "cohorts": [
+        {
+          "id": "cohort_1",
+          "label": "Initial",
+          "role": "unspecified",
+          "n": {
+            "enrolled": null,
+            "dosed": null,
+            "analysed": 201
+          },
+          "health_status": "unspecified",
+          "country": null,
+          "descriptors": [
+            {
+              "name": "age",
+              "unit": "years",
+              "statistics": [
+                {
+                  "type": "range",
+                  "minimum": 1,
+                  "maximum": 14
+                }
+              ],
+              "categories": [],
+              "source": {
+                "status": "reported",
+                "source_locator": "appendix study row 30",
+                "evidence": "9.5 (1 – 14)",
+                "confidence": 1
+              }
+            },
+            {
+              "name": "weight",
+              "unit": "kg",
+              "statistics": [
+                {
+                  "type": "range",
+                  "minimum": 9,
+                  "maximum": 78
+                }
+              ],
+              "categories": [],
+              "source": {
+                "status": "reported",
+                "source_locator": "appendix study row 30",
+                "evidence": "35 (9-78)",
+                "confidence": 1
+              }
+            }
+          ],
+          "pharmacogenetics": [],
+          "source": {
+            "status": "reported",
+            "source_locator": "appendix study row 30",
+            "evidence": "N: 201 (Spain) Age: 9.5 (1 – 14) WT: 35 (9-78)",
+            "confidence": 1
+          }
+        },
+        {
+          "id": "cohort_2",
+          "label": "Validation",
+          "role": "unspecified",
+          "n": {
+            "enrolled": null,
+            "dosed": null,
+            "analysed": 74
+          },
+          "health_status": "unspecified",
+          "country": null,
+          "descriptors": [
+            {
+              "name": "age",
+              "unit": "years",
+              "statistics": [
+                {
+                  "type": "range",
+                  "minimum": 1,
+                  "maximum": 14
+                }
+              ],
+              "categories": [],
+              "source": {
+                "status": "reported",
+                "source_locator": "appendix study row 30",
+                "evidence": "9.8 (1-14)",
+                "confidence": 1
+              }
+            },
+            {
+              "name": "weight",
+              "unit": "kg",
+              "statistics": [
+                {
+                  "type": "range",
+                  "minimum": 11,
+                  "maximum": 70
+                }
+              ],
+              "categories": [],
+              "source": {
+                "status": "reported",
+                "source_locator": "appendix study row 30",
+                "evidence": "39.8 (11-70)",
+                "confidence": 1
+              }
+            }
+          ],
+          "pharmacogenetics": [],
+          "source": {
+            "status": "reported",
+            "source_locator": "appendix study row 30",
+            "evidence": "N: 74 (Spain) Age: 9.8 (1-14) WT: 39.8 (11-70)",
+            "confidence": 1
+          }
+        }
+      ],
+      "assumptions": "Total N is the sum of separately reported cohorts; overlap was not reported.",
+      "source": {
+        "status": "reported",
+        "source_locator": "appendix study row 30",
+        "evidence": "Initial N: 201 (Spain) Age: 9.5 (1 – 14) WT: 35 (9-78) Validation N: 74 (Spain) Age: 9.8 (1-14) WT: 39.8 (11-70)",
+        "confidence": 1
+      }
+    },
+    "route": "oral",
+    "n_subjects": 275,
+    "assay_unit": "mg/L",
+    "keywords": ["population pk", "antiseizure medicine", "AEDapt migration", "compartmental"],
+    "dataset_fingerprint": "pmid:9108639"
+  },
+  "confidence": {
+    "overall": 0.86,
+    "fields": {
+      "structure": 0.9,
+      "parameters": 0.9,
+      "population": 0.95
+    }
+  },
+  "provenance": {
+    "source_type": "legacy_curated_model",
+    "origin": "AEDapt",
+    "source_file": "CBZ_P_DELGADO.R",
+    "source_sha256": "7bf14e45ee457da789855cc297f8917ace14d8a8a415562c148f958ce996ca53",
+    "source_repository_included": false,
+    "reference_corpus_id": "aed_cbz_9108639_m01",
+    "pmid": "9108639",
+    "migration_method": "deterministic curated translation",
+    "corrections": "Corrected AEDapt's fourth-root OMEGA error: 0.118 is the NONMEM variance.",
+    "assumptions": [],
+    "description": "Translated from the legacy AEDapt model definition. Published information was preferred over executable legacy code when they differed."
+  },
+  "qualification": {
+    "author_validated": false,
+    "curator": "LibeR AEDapt migration - independent review pending",
+    "clinical_use": [
+      {
+        "schema": "liberary.clinical_qualification",
+        "schema_version": "1.0.0",
+        "qualification_id": "cq-aedapt_cbz_delgado-candidate",
+        "version": "1.0.0",
+        "status": "candidate",
+        "scope": {
+          "drugs": "carbamazepine",
+          "analytes": "carbamazepine",
+          "metabolites": [],
+          "indications": ["epilepsy", "seizure disorder"],
+          "routes": "oral",
+          "formulations": [],
+          "regimens": [],
+          "endpoint_ids": [],
+          "endpoint_kinds": "therapeutic_range",
+          "population": {
+            "age": {
+              "min": 0.5,
+              "max": 15,
+              "unit": "years",
+              "required": true,
+              "hard": true,
+              "covariate": "AGE"
+            }
+          },
+          "covariates": {
+            "required": ["WT", "AGE", "DOSE_MG_KG_DAY"],
+            "optional": "COMED_PHB",
+            "supported_imputation": [],
+            "ranges": []
+          },
+          "assays": {
+            "required": true,
+            "matrices": ["plasma", "serum"],
+            "methods": [],
+            "units": "mg/L"
+          }
+        },
+        "evidence": {
+          "source": "AEDapt legacy implementation plus AED PK/PD review corpus",
+          "computational_translation": "control-stream parse checked",
+          "clinical_validation": "not performed",
+          "model_sha256": "453dfaddb1d604de83b1d6e35a8ce9b1c167fa2bcab5c2fd106c8283e6354983"
+        },
+        "governance": {
+          "issuer": "LibeR AEDapt migration",
+          "reviewer": "",
+          "valid_from": "2026-07-29T00:00:00Z",
+          "review_due": ""
+        },
+        "limitations": "Research candidate only; independent source verification and clinical qualification are required before patient-care use.",
+        "out_of_domain_rules": {
+          "reject_outside_age_range": true,
+          "reject_missing_required_covariates": true,
+          "require_qualified_status_for_automatic_selection": true
+        },
+        "supersedes": "",
+        "notes": "Migrated from AEDapt; catalogue availability is not clinical endorsement.",
+        "created_at": "2026-07-29T00:00:00Z",
+        "model": {
+          "library_id": "aedapt_cbz_delgado",
+          "version": "1.0.0",
+          "model_sha256": "453dfaddb1d604de83b1d6e35a8ce9b1c167fa2bcab5c2fd106c8283e6354983",
+          "manifest_schema_version": "1.5.0"
+        }
+      }
+    ]
+  },
+  "relations": {
+    "same_compound": [],
+    "prior_version": [],
+    "mbma_pool": false
+  },
+  "created_at": "2026-07-29T00:00:00Z",
+  "updated_at": "2026-07-29T00:00:00Z"
+}

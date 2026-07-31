@@ -114,6 +114,31 @@ fail closed. LibeRator then applies the qualification scope to the patient data
 available at the requested decision time and preserves the resulting evidence
 as an auditable selection object.
 
+### AEDapt model migration
+
+The packaged catalogue includes 19 translated AEDapt population-PK models for
+carbamazepine, clobazam, clonazepam, lamotrigine, levetiracetam, lorazepam,
+oxcarbazepine, phenobarbital, phenytoin, topiramate, valproate, and zonisamide.
+They are research candidates: each record contains the legacy source hash,
+systematic-review link where available, corrections, generated assumptions, and
+a current candidate qualification. They therefore appear in LibeRator
+suitability assessments but are never selected automatically until an
+authorised reviewer creates a suitably scoped `qualified` record.
+
+For explicit research work, a candidate can be loaded programmatically with an
+audited override and then registered in a LibeRator workspace:
+
+```r
+model <- LibeRator::lator_model_from_liberary(
+  "aedapt_lamotrigine_rivas",
+  allow_unvalidated = TRUE
+)
+```
+
+The deterministic migration can be reproduced from the legacy source with
+`Rscript LibeRary/tools/import-aedapt-models.R` and `AEDAPT_ROOT` can point to a
+different local AEDapt checkout.
+
 ## Configure models and Docling
 
 Ollama is the local default. OpenAI and OpenAI-compatible endpoints are also

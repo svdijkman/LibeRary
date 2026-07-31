@@ -1,5 +1,29 @@
+# LibeRary 0.7.10
+
+- Upgrades older active copies of packaged catalogue entries when a newer
+  packaged model revision is installed. The update is transactional, archives
+  the former active files under `versions/<version>`, retains unrelated local
+  files and qualification history, and never downgrades a newer local entry.
+- Restricts active clinical-use qualifications to the model version to which
+  they were bound, so archived qualification records cannot qualify a newer
+  model revision accidentally.
+- Ensures that the corrected He et al. lamotrigine v1.0.1 translation replaces
+  an earlier persistently seeded v1.0.0 copy on the next catalogue access.
+
 # LibeRary 0.7.9
 
+- Corrects the migrated He et al. lamotrigine model to use its published
+  weight-normalised volume relationship,
+  `V/F = 16.7 * (WT / 27.87)` L. The legacy AEDapt implementation had
+  inadvertently multiplied 16.7 directly by body weight.
+- Adds 19 provenance-rich antiseizure-medicine model translations from the
+  legacy AEDapt library, covering 12 medicines. Each control stream is
+  parse/simulation checked, and every corrected legacy defect or added dynamic
+  assumption is recorded alongside the immutable source hash.
+- Publishes the AEDapt translations as research `candidate` records rather
+  than clinically `qualified` records. This makes them inspectable and
+  explicitly importable while preserving LibeRator's fail-closed automatic
+  model-selection boundary.
 - Establishes the clinical-qualification catalogue functions as a versioned
   public API contract. This prevents an older in-memory or installed 0.7.8
   namespace from being mistaken for a build that supports qualified-model

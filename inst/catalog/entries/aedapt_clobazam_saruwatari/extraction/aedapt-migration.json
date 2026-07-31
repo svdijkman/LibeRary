@@ -1,0 +1,22 @@
+{
+  "schema": "liberary.aedapt_migration",
+  "schema_version": "1.0.0",
+  "library_id": "aedapt_clobazam_saruwatari",
+  "source": {
+    "application": "AEDapt",
+    "file": "CLBZ_AP_SARUWATARI.R",
+    "sha256": "113383cb35b072bcd76942c4ea1811b2a9c9819360565c07c8f6196e38286437",
+    "author_label": "Saruwatari"
+  },
+  "reference": {
+    "corpus_id": "aed-pkpd-reference",
+    "corpus_version": "0.2.2",
+    "reference_id": "",
+    "pmid": ""
+  },
+  "decisions": {
+    "corrections": "Removed AEDapt's random genotype generation; observed patient genotypes are required.",
+    "assumptions": [],
+    "clinical_status": "candidate"
+  }
+}

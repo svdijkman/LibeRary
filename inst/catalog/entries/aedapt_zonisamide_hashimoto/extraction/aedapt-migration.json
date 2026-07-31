@@ -1,0 +1,22 @@
+{
+  "schema": "liberary.aedapt_migration",
+  "schema_version": "1.0.0",
+  "library_id": "aedapt_zonisamide_hashimoto",
+  "source": {
+    "application": "AEDapt",
+    "file": "ZNS_AP_HASHIMOTO.R",
+    "sha256": "d9ef292260f64cf985f53a95c3406cd8ee35b346aca33dccb51d04a59df329d5",
+    "author_label": "Hashimoto"
+  },
+  "reference": {
+    "corpus_id": "aed-pkpd-reference",
+    "corpus_version": "0.2.2",
+    "reference_id": "aed_zns_8205132_m01",
+    "pmid": "8205132"
+  },
+  "decisions": {
+    "corrections": "Restored the reported normal ETA on KM and implemented Michaelis-Menten elimination dynamically; AEDapt approximated a dose-dependent linear clearance.",
+    "assumptions": "KA=2 h^-1 was added as a fixed generated default for dynamic oral dosing.",
+    "clinical_status": "candidate"
+  }
+}

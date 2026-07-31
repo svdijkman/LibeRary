@@ -1,0 +1,22 @@
+{
+  "schema": "liberary.aedapt_migration",
+  "schema_version": "1.0.0",
+  "library_id": "aedapt_cbz_delgado",
+  "source": {
+    "application": "AEDapt",
+    "file": "CBZ_P_DELGADO.R",
+    "sha256": "7bf14e45ee457da789855cc297f8917ace14d8a8a415562c148f958ce996ca53",
+    "author_label": "Delgado"
+  },
+  "reference": {
+    "corpus_id": "aed-pkpd-reference",
+    "corpus_version": "0.2.2",
+    "reference_id": "aed_cbz_9108639_m01",
+    "pmid": "9108639"
+  },
+  "decisions": {
+    "corrections": "Corrected AEDapt's fourth-root OMEGA error: 0.118 is the NONMEM variance.",
+    "assumptions": [],
+    "clinical_status": "candidate"
+  }
+}

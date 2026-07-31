@@ -1,0 +1,22 @@
+{
+  "schema": "liberary.aedapt_migration",
+  "schema_version": "1.0.0",
+  "library_id": "aedapt_zonisamide_okada",
+  "source": {
+    "application": "AEDapt",
+    "file": "ZNS_AP_OKADA.R",
+    "sha256": "1bbded127a8d34ad8cb5a846138c20bf467b07ba470699fcc7cef662439d344f",
+    "author_label": "Okada"
+  },
+  "reference": {
+    "corpus_id": "aed-pkpd-reference",
+    "corpus_version": "0.2.2",
+    "reference_id": "aed_zns_18641551_m01",
+    "pmid": "18641551"
+  },
+  "decisions": {
+    "corrections": [],
+    "assumptions": ["V/F=1.23*WT was borrowed by AEDapt from an Odani phenytoin model.", "KA=2 h^-1 was an AEDapt generated default; both structural values are fixed."],
+    "clinical_status": "candidate"
+  }
+}
