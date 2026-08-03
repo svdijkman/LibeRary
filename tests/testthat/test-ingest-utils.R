@@ -143,8 +143,14 @@ test_that("control mapping converts CV percentages to NONMEM variances", {
     list(name = "V", typical = 50, se = NULL, unit = "L"),
     list(name = "extra", typical = 3, se = NULL, unit = NULL)
   )
-  ext$parameters$omega <- list(list(description = "CV% CL", value = 37.9))
-  ext$parameters$sigma <- list(list(description = "CV% residual", value = 14.1))
+  ext$parameters$omega <- list(list(
+    description = "CV% CL", reported_value = 37.9,
+    reported_metric = "cv_percent", eta_distribution = "log_normal"
+  ))
+  ext$parameters$sigma <- list(list(
+    description = "CV% residual", reported_value = 14.1,
+    reported_metric = "cv_percent"
+  ))
   ctl <- ingest_map_to_ctl(ext)
   mapping <- attr(ctl, "mapping")
   expect_false(any(grepl("^ 37[.]9$|^ 14[.]1$", ctl)))
@@ -180,6 +186,18 @@ test_that("normal ETA CV is converted on the absolute parameter scale", {
   omega <- as.numeric(trimws(ctl[[match("$OMEGA", ctl) + 1L]]))
   expect_equal(omega, 1)
   expect_true(any(grepl("CL = THETA[(]1[)] [+] ETA[(]1[)]", ctl)))
+})
+
+test_that("OMEGA scale is never inferred from value magnitude or prose", {
+  unresolved <- LibeRary:::.library_omega_variance(list(
+    description = "IIV CV 30 percent", parameter = "CL",
+    reported_value = 30, reported_metric = "unknown",
+    eta_distribution = "log_normal"
+  ))
+  expect_false(unresolved$supported)
+  expect_true(unresolved$review)
+  expect_true(is.na(unresolved$value))
+  expect_identical(unresolved$metric, "unknown")
 })
 
 test_that("OMEGA correlations render as a NONMEM block covariance", {
@@ -308,4 +326,50 @@ test_that("GUI progress retains separate batch and current-PMID channels", {
   expect_equal(state$current$pmid, "123")
   expect_equal(state$current$stage, "vision_extraction")
   expect_match(state$current$message, "vision extraction")
+})
+
+test_that("failed acquisition leaves a resumable manual-inbox request", {
+  root <- tempfile("liberary-manual-inbox-")
+  dir.create(root)
+  cfg <- getFromNamespace("DEFAULT_CONFIG", "LibeRary")
+  cfg$data_dir <- root
+  cfg$inbox_dir <- file.path(root, "inbox")
+  cfg$cache_dir <- file.path(root, "cache")
+  cfg$catalog_dir <- file.path(root, "catalog")
+  cfg <- ingest_validate_config(cfg)
+  request <- LibeRary:::.library_manual_download_request(
+    "12345", "https://publisher.test/article", "fixture failure", cfg
+  )
+  expect_true(file.exists(request))
+  pending <- ingest_manual_inbox_requests(cfg)
+  expect_equal(pending$status, "pending")
+  expect_equal(pending$attempts, 1L)
+
+  pdf <- file.path(cfg$inbox_dir, "12345", "article.pdf")
+  con <- file(pdf, "wb")
+  writeBin(c(charToRaw("%PDF-1.4\n"), as.raw(rep(0, 1100))), con)
+  close(con)
+  complete <- ingest_manual_inbox_requests(cfg)
+  expect_equal(complete$status, "complete")
+  expect_equal(LibeRary:::ingest_inbox_pdf_path(cfg, "12345"), pdf)
+})
+
+test_that("deliberative vision role is explicit and defaults to falsification", {
+  cfg <- ingest_validate_config(getFromNamespace("DEFAULT_CONFIG", "LibeRary"))
+  expect_equal(cfg$deliberative$vision_lane, "falsification")
+  expect_equal(cfg$llm$extraction_independence, "required")
+  expect_gte(cfg$deliberative$max_gap_rounds, 2L)
+  cfg$deliberative$vision_lane <- "duplicate_synthesis"
+  expect_error(ingest_validate_config(cfg), "arg")
+})
+
+test_that("legacy extraction independence settings migrate explicitly", {
+  cfg <- getFromNamespace("DEFAULT_CONFIG", "LibeRary")
+  cfg$llm$extraction_independence <- NULL
+  cfg$llm$require_independent_extraction_models <- FALSE
+  cfg <- ingest_validate_config(cfg)
+  expect_equal(cfg$llm$extraction_independence, "preferred")
+  expect_false(cfg$llm$require_independent_extraction_models)
+  cfg$llm$extraction_independence <- "invalid"
+  expect_error(ingest_validate_config(cfg), "arg")
 })

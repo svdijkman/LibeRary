@@ -146,7 +146,7 @@ ingest_discover <- function(
 
 ingest_inbox_pdf_path <- function(cfg, pmid) {
   p <- file.path(cfg$inbox_dir, pmid, "article.pdf")
-  if (file.exists(p) && file.info(p)$size > 1000) p else ""
+  if (file.exists(p) && file.info(p)$size > 1000 && ingest_is_probably_pdf(p)) p else ""
 }
 
 ingest_entries_to_df <- function(entries) {

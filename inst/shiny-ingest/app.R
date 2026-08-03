@@ -551,6 +551,14 @@ ui <- fluidPage(
             "deliberative_visual", "Verify material claims against PDF pages",
             isTRUE(default_cfg$deliberative$visual_verification)
           ),
+          selectInput(
+            "deliberative_vision_lane", "Vision role",
+            choices = c(
+              "Independent falsification (recommended)" = "falsification",
+              "Parallel one-shot model extraction" = "parallel_extraction"
+            ),
+            selected = default_cfg$deliberative$vision_lane %||% "falsification"
+          ),
           checkboxInput(
             "deliberative_cache", "Resume completed investigation stages",
             isTRUE(default_cfg$deliberative$cache_stages)
@@ -558,7 +566,7 @@ ui <- fluidPage(
           fluidRow(
             column(6, numericInput(
               "deliberative_gap_rounds", "Gap-search rounds",
-              value = default_cfg$deliberative$max_gap_rounds %||% 1L,
+              value = default_cfg$deliberative$max_gap_rounds %||% 2L,
               min = 0, max = 3, step = 1
             )),
             column(6, numericInput(
@@ -583,7 +591,15 @@ ui <- fluidPage(
         ),
         helpText("NCBI permits up to 3 requests/second without a key and up to 10 with a key. LibeRary defaults to a conservative 1 request/second."),
         checkboxInput("download_oa", "Auto-download open-access PDFs", TRUE),
-        checkboxInput("independent_models", "Require different text and vision models", FALSE),
+        selectInput(
+          "extraction_independence", "Text/vision model independence",
+          choices = c(
+            "Required for publication" = "required",
+            "Preferred; correlated lanes require review" = "preferred",
+            "Off (exploratory only)" = "off"
+          ),
+          selected = default_cfg$llm$extraction_independence %||% "required"
+        ),
         checkboxInput("allow_remote_content", "Allow publication text to configured remote LLMs", FALSE),
         checkboxInput("use_chromote", "Chromote fallback for fetch", FALSE),
         hr(),
@@ -785,12 +801,14 @@ server <- function(input, output, session) {
     for (role in llm_roles) cfg$llm[[role]]$instruction <- instruction_overrides[[role]] %||% ""
     cfg$triage$high_threshold <- input$triage_high %||% cfg$triage$high_threshold
     cfg$triage$intermediate_threshold <- input$triage_intermediate %||% cfg$triage$intermediate_threshold
-    cfg$llm$require_independent_extraction_models <- isTRUE(input$independent_models)
+    cfg$llm$extraction_independence <- input$extraction_independence %||% "required"
     cfg$llm$allow_remote_content <- isTRUE(input$allow_remote_content)
     cfg$ollama$num_ctx <- as.integer(input$ollama_num_ctx %||% cfg$ollama$num_ctx)
     cfg$ollama$num_predict <- as.integer(input$ollama_num_predict %||% cfg$ollama$num_predict)
     cfg$deliberative$enabled <- isTRUE(input$deliberative_enabled)
     cfg$deliberative$visual_verification <- isTRUE(input$deliberative_visual)
+    cfg$deliberative$vision_lane <- input$deliberative_vision_lane %||%
+      cfg$deliberative$vision_lane
     cfg$deliberative$cache_stages <- isTRUE(input$deliberative_cache)
     cfg$deliberative$max_gap_rounds <- as.integer(
       input$deliberative_gap_rounds %||% cfg$deliberative$max_gap_rounds
@@ -1119,10 +1137,11 @@ server <- function(input, output, session) {
         adjudication_model = input$adjudication_model,
         triage_high_threshold = input$triage_high,
         triage_intermediate_threshold = input$triage_intermediate,
-        require_independent_extraction_models = isTRUE(input$independent_models),
+        extraction_independence = input$extraction_independence %||% "required",
         allow_remote_content = isTRUE(input$allow_remote_content),
         deliberative_enabled = isTRUE(input$deliberative_enabled),
         deliberative_visual_verification = isTRUE(input$deliberative_visual),
+        deliberative_vision_lane = input$deliberative_vision_lane,
         deliberative_cache_stages = isTRUE(input$deliberative_cache),
         deliberative_max_gap_rounds = input$deliberative_gap_rounds,
         deliberative_max_chunks_per_stage = input$deliberative_chunks,

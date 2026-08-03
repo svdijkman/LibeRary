@@ -42,13 +42,22 @@ ingest_gui_worker <- function(params) {
   }
   if (!is.null(params$triage_high_threshold)) cfg$triage$high_threshold <- as.numeric(params$triage_high_threshold)
   if (!is.null(params$triage_intermediate_threshold)) cfg$triage$intermediate_threshold <- as.numeric(params$triage_intermediate_threshold)
-  cfg$llm$require_independent_extraction_models <- isTRUE(params$require_independent_extraction_models)
+  if (!is.null(params$extraction_independence)) {
+    cfg$llm$extraction_independence <- as.character(params$extraction_independence)
+  } else if (!is.null(params$require_independent_extraction_models)) {
+    cfg$llm$extraction_independence <- if (
+      isTRUE(params$require_independent_extraction_models)
+    ) "required" else "preferred"
+  }
   cfg$llm$allow_remote_content <- isTRUE(params$allow_remote_content)
   if (!is.null(params$deliberative_enabled)) {
     cfg$deliberative$enabled <- isTRUE(params$deliberative_enabled)
   }
   if (!is.null(params$deliberative_visual_verification)) {
     cfg$deliberative$visual_verification <- isTRUE(params$deliberative_visual_verification)
+  }
+  if (!is.null(params$deliberative_vision_lane)) {
+    cfg$deliberative$vision_lane <- as.character(params$deliberative_vision_lane)
   }
   if (!is.null(params$deliberative_cache_stages)) {
     cfg$deliberative$cache_stages <- isTRUE(params$deliberative_cache_stages)

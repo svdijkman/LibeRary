@@ -138,6 +138,11 @@ ingest_process_batch <- function(manifest, cfg = NULL, tiers = NULL, limit = Inf
         model_present = dual$model_present,
         comparison = dual$comparison,
         adjudication = dual$adjudication$result %||% NULL,
+        independence_policy = dual$independence_policy %||%
+          dual$audit$independence_policy %||% "unknown",
+        independent_models = dual$independent_models %||% NA,
+        independence_gate_passed = dual$independence_gate_passed %||%
+          dual$audit$independence_gate_passed %||% NA,
         warning = dual$warning,
         lane_issues = lane_issues,
         audit_artifact = "extraction-audit.json",
@@ -163,6 +168,13 @@ ingest_process_batch <- function(manifest, cfg = NULL, tiers = NULL, limit = Inf
         } else "dual_lane_reconciliation",
         comparison = dual$comparison,
         adjudication = dual$adjudication$result %||% list(status = "not_required"),
+        extraction_independence = list(
+          policy = dual$independence_policy %||%
+            dual$audit$independence_policy %||% "unknown",
+          independent_models = dual$independent_models %||% NA,
+          gate_passed = dual$independence_gate_passed %||%
+            dual$audit$independence_gate_passed %||% NA
+        ),
         machine_status = dual$status,
         human_validated = FALSE
       )

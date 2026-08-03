@@ -73,6 +73,19 @@ ingest_fetch_institutional <- function(
     }
 
     res <- ingest_fetch_one_row(row, cfg, use_chromote_fallback = use_chromote_fallback)
+    if (!isTRUE(res$success)) {
+      request <- .library_manual_download_request(
+        pmid, res$final_url %||% row$suggested_url,
+        res$error %||% "Automated acquisition failed.", cfg
+      )
+      res$manual_request <- request
+      res$error <- paste0(
+        res$error %||% "Automated acquisition failed.",
+        " Place a legitimately obtained PDF at ",
+        file.path(cfg$inbox_dir, pmid, "article.pdf"),
+        "; the next fetch/process pass will resume automatically."
+      )
+    }
     log(sprintf("  -> %s", if (isTRUE(res$success)) "OK" else res$error), if (isTRUE(res$success)) "INFO" else "WARN")
     results[[i]] <- res
     match_idx <- which(df$pmid == pmid)[1]
@@ -145,6 +158,69 @@ ingest_fetch_one_row <- function(row, cfg, use_chromote_fallback = FALSE) {
   list(pmid = pmid, success = FALSE, path = NA_character_, error = sprintf("Unsupported strategy: %s", strategy), strategy = strategy)
 }
 
+.library_manual_download_request <- function(pmid, url, reason, cfg) {
+  directory <- file.path(cfg$inbox_dir, as.character(pmid))
+  if (!dir.exists(directory)) dir.create(directory, recursive = TRUE, showWarnings = FALSE)
+  path <- file.path(directory, "manual-download.json")
+  previous <- if (file.exists(path)) tryCatch(
+    jsonlite::read_json(path, simplifyVector = TRUE), error = function(error) NULL
+  ) else NULL
+  request <- list(
+    schema = "liberary.manual-download", version = 1L,
+    pmid = as.character(pmid), source_url = as.character(url %||% ""),
+    destination = normalizePath(
+      file.path(directory, "article.pdf"), winslash = "/", mustWork = FALSE
+    ),
+    reason = as.character(reason %||% "Automated acquisition failed."),
+    requested_at = previous$requested_at %||%
+      format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
+    last_attempt_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
+    attempts = as.integer(previous$attempts %||% 0L) + 1L,
+    instruction = paste(
+      "Use institutional or other legitimate access to obtain the article PDF,",
+      "save it exactly at destination, then rerun Fetch or Process models."
+    )
+  )
+  .library_atomic_write(request, path)
+  normalizePath(path, winslash = "/", mustWork = TRUE)
+}
+
+#' List durable manual-PDF acquisition requests
+#'
+#' Automated publisher downloads that fail leave a durable request beside the
+#' expected `article.pdf`. Once a valid PDF is placed there, the request is
+#' reported as complete and the next fetch or process pass resumes normally.
+#' @param cfg LibeRary configuration or `NULL`.
+#' @return A data frame of pending and completed manual-inbox requests.
+#' @export
+ingest_manual_inbox_requests <- function(cfg = NULL) {
+  cfg <- if (is.null(cfg)) ingest_load_config() else ingest_validate_config(cfg)
+  paths <- list.files(
+    cfg$inbox_dir, pattern = "^manual-download\\.json$", recursive = TRUE,
+    full.names = TRUE
+  )
+  if (!length(paths)) return(data.frame(
+    pmid = character(), status = character(), destination = character(),
+    source_url = character(), attempts = integer(), reason = character(),
+    stringsAsFactors = FALSE
+  ))
+  do.call(rbind, lapply(paths, function(path) {
+    value <- tryCatch(jsonlite::read_json(path, simplifyVector = TRUE),
+                      error = function(error) list())
+    destination <- as.character(value$destination %||% "")[[1L]]
+    complete <- nzchar(destination) && ingest_is_probably_pdf(destination) &&
+      file.info(destination)$size > 1000
+    data.frame(
+      pmid = as.character(value$pmid %||% basename(dirname(path))),
+      status = if (complete) "complete" else "pending",
+      destination = destination,
+      source_url = as.character(value$source_url %||% ""),
+      attempts = as.integer(value$attempts %||% NA_integer_),
+      reason = as.character(value$reason %||% ""), stringsAsFactors = FALSE
+    )
+  }))
+}
+
 #' Fetch PDF via headless Chrome (optional fallback)
 #'
 #' @param pmid PMID.
@@ -167,7 +243,15 @@ ingest_fetch_via_chromote <- function(pmid, url, cfg) {
   tryCatch({
     b <- chromote::ChromoteSession$new()
     b$Page$navigate(url)
-    Sys.sleep(3)
+    deadline <- Sys.time() + 15
+    repeat {
+      ready <- tryCatch(
+        b$Runtime$evaluate("document.readyState")$result$value,
+        error = function(error) ""
+      )
+      if (ready %in% c("interactive", "complete") || Sys.time() >= deadline) break
+      Sys.sleep(0.1)
+    }
     final_url <- b$Runtime$evaluate("window.location.href")$result$value
     # Try common PDF link patterns
     pdf_href <- b$Runtime$evaluate(

@@ -51,16 +51,9 @@
                 metric = metric, distribution = distribution,
                 note = "No usable variability value was reported."))
   }
-  if (metric %in% c("unknown", "")) {
-    if (!is.finite(reported) && is.finite(converted) && converted <= 1) {
-      metric <- "variance"
-    } else if (raw <= 1) {
-      metric <- "variance"
-    } else if (raw <= 500 && grepl("cv|percent|variability|iiv|bsv|interindividual|between.subject", description, ignore.case = TRUE)) {
-      metric <- "cv_percent"
-      metric_inferred <- TRUE
-    }
-  }
+  # Never infer a variability scale from magnitude or prose. A runnable but
+  # incorrectly scaled OMEGA is more dangerous than an explicit unresolved
+  # field, so only schema-declared reported_metric values are converted.
 
   value <- switch(metric,
     variance = raw,
@@ -110,13 +103,7 @@
     return(list(value = NA_real_, supported = FALSE, review = TRUE, metric = metric,
                 note = "No usable residual-variability value was reported."))
   }
-  if (metric %in% c("unknown", "")) {
-    if (raw <= 1) metric <- "variance"
-    else if (raw <= 500 && grepl("cv|percent|proportional", description, ignore.case = TRUE)) {
-      metric <- "cv_percent"
-      metric_inferred <- TRUE
-    }
-  }
+  # As for OMEGA, residual-error scale must be explicit in reported_metric.
   value <- switch(metric,
     variance = raw,
     sd = raw^2,
@@ -145,7 +132,6 @@
   row <- suppressWarnings(as.integer(item$row_eta %||% NA_integer_))
   col <- suppressWarnings(as.integer(item$col_eta %||% NA_integer_))
   inferred <- FALSE
-  if (metric == "unknown" && is.finite(converted)) metric <- "covariance"
   if (metric == "correlation" && is.finite(raw) && abs(raw) > 1 && abs(raw) <= 100) {
     raw <- raw / 100
     inferred <- TRUE

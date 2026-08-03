@@ -142,7 +142,37 @@ test_that("claim ids are namespaced by specialist stage", {
                c("theta::c1", "omega::c1"))
 })
 
-test_that("deliberative extraction completes staged investigation before synthesis", {
+test_that("synthesis material fields must bind to active ledger claims", {
+  ledger <- list(claims = list(
+    list(id = "structure::c1", domain = "structure", status = "reported"),
+    list(id = "theta::c1", domain = "theta", status = "reported")
+  ))
+  value <- list(
+    model_present = TRUE,
+    extraction = list(
+      structural_model = list(description = "one compartment"),
+      parameters = list(
+        theta = list(list(name = "CL")), omega = list(),
+        omega_covariance = list(), sigma = list()
+      ),
+      covariates = list(), dosing = list(), reproduction_targets = list()
+    ),
+    field_evidence = list(
+      list(field = "structural_model", claim_ids = list("structure::c1")),
+      list(field = "parameters.theta.CL", claim_ids = list("theta::c1"))
+    )
+  )
+  checks <- LibeRary:::.library_synthesis_binding_checks(value, ledger)
+  expect_true(checks$ready)
+
+  value$field_evidence[[2L]]$claim_ids <- list("missing::claim")
+  checks <- LibeRary:::.library_synthesis_binding_checks(value, ledger)
+  expect_false(checks$ready)
+  expect_equal(checks$missing_domains, "theta")
+  expect_equal(checks$invalid_claim_ids, "missing::claim")
+})
+
+test_that("failed evidence gates produce review-only artifacts without synthesis", {
   root <- tempfile("liberary-deliberative-")
   dir.create(root)
   markdown <- file.path(root, "article.md")
@@ -197,11 +227,17 @@ test_that("deliberative extraction completes staged investigation before synthes
   expect_true(isTRUE(result$result$model_present))
   expect_true(all(c(
     "document_map", "reconnaissance", "investigate_structure",
-    "falsification_1", "consistency_checks", "synthesis", "deliberative_complete"
+    "falsification_1", "consistency_checks", "deliberative_gate_blocked"
   ) %in% stages))
+  expect_false("synthesis" %in% stages)
+  expect_true(result$audit$synthesis_skipped)
+  expect_match(
+    paste(unlist(result$result$limitations), collapse = " "),
+    "synthesis was not run"
+  )
   expect_equal(result$audit$pipeline, "evidence_led_deliberative")
   expect_true(file.exists(result$audit$evidence_ledger_path))
-  expect_gte(length(result$audit$stages), 9L)
+  expect_gte(length(result$audit$stages), 8L)
 })
 
 test_that("catalogue versions preserve their evidence ledger", {

@@ -63,6 +63,16 @@ ADJUDICATION_SYSTEM_PROMPT <- paste(
   ), required = c("field", "value", "source_locator", "evidence", "confidence")
 )
 
+.library_deliberative_evidence_item_schema <- function() {
+  schema <- .library_evidence_item_schema()
+  schema$properties$claim_ids <- list(
+    type = "array", minItems = 1L, maxItems = 12L,
+    items = list(type = "string")
+  )
+  schema$required <- c(schema$required, "claim_ids")
+  schema
+}
+
 .library_lane_schema <- function() list(
   type = "object", additionalProperties = FALSE,
   properties = list(
@@ -76,6 +86,13 @@ ADJUDICATION_SYSTEM_PROMPT <- paste(
   ), required = c("model_present", "model_probability", "recoverability", "extraction",
                   "field_evidence", "limitations")
 )
+
+.library_deliberative_lane_schema <- function() {
+  schema <- .library_lane_schema()
+  schema$properties$field_evidence$items <-
+    .library_deliberative_evidence_item_schema()
+  schema
+}
 
 .library_adjudication_schema <- function() list(
   type = "object", additionalProperties = FALSE,
@@ -105,6 +122,17 @@ ADJUDICATION_SYSTEM_PROMPT <- paste(
   ), required = c("model_present", "resolved_extraction", "decisions", "unresolved_fields",
                   "confidence", "summary")
 )
+
+.library_warn_correlated_extraction_lanes <- local({
+  warned <- FALSE
+  function(message) {
+    if (!warned) {
+      warning(message, call. = FALSE, immediate. = TRUE)
+      warned <<- TRUE
+    }
+    invisible(NULL)
+  }
+})
 
 .library_bundle_text <- function(bundle, max_chars = 120000L) {
   path <- as.character(bundle$parser$markdown_path %||% "")[[1L]]
@@ -477,6 +505,56 @@ ingest_dual_extract <- function(metadata, bundle, cfg = NULL, adjudicate = TRUE,
     }
   )
   stage(0.57, paste0(text_label, " complete", runtime_label(text)), "text_extraction")
+  falsification_mode <- isTRUE(cfg$deliberative$enabled) &&
+    identical(cfg$deliberative$vision_lane, "falsification")
+  if (falsification_mode) {
+    visual <- text$visual_review
+    vision <- if (is.list(visual) && !is.null(visual$value)) list(
+      available = TRUE, lane = "vision_falsification",
+      review = visual$value, result = NULL, audit = visual$audit %||% list()
+    ) else list(
+      available = FALSE, lane = "vision_falsification", result = NULL,
+      error = "Visual falsification was disabled or original PDF pages were unavailable."
+    )
+    stage(0.78, "Reconciling the evidence ledger and visual falsification (CPU)", "reconciliation")
+    checks <- text$audit$deterministic_checks %||% text$checks %||% NULL
+    binding_checks <- text$audit$synthesis_binding_checks %||% NULL
+    ready <- isTRUE(text$available) && is.list(text$result) &&
+      (!is.list(checks) || isTRUE(checks$ready)) &&
+      (!is.list(binding_checks) || isTRUE(binding_checks$ready)) &&
+      !isTRUE(text$audit$synthesis_quarantined)
+    model_present <- if (isTRUE(text$available)) {
+      isTRUE(text$result$model_present)
+    } else NA
+    comparison <- list(
+      comparable = FALSE, consistent = NA,
+      mode = "evidence_ledger_with_independent_visual_falsification",
+      reason = "The vision lane challenges ledger claims and does not create a second synthesized model."
+    )
+    warning <- if (!isTRUE(vision$available)) vision$error else ""
+    status <- if (ready) "machine_consistent" else "needs_review"
+    stage(1, "Evidence investigation and visual falsification complete", "complete")
+    return(list(
+      status = status, model_present = model_present,
+      extraction = text$result$extraction %||% NULL,
+      text = text, vision = vision, comparison = comparison,
+      adjudication = NULL, independent_models = NA,
+      independence_policy = "not_applicable_falsification",
+      independence_gate_passed = TRUE, warning = warning,
+      audit = list(
+        schema_version = LIBRARY_SCHEMA_VERSION,
+        prompt_version = LIBRARY_PROMPT_VERSION,
+        source_sha256 = bundle$source$sha256 %||% "",
+        reconciliation_mode = comparison$mode,
+        text = text$audit %||% list(error = text$error %||% ""),
+        vision = vision$audit %||% list(error = vision$error %||% ""),
+        comparison = comparison, adjudication = list(skipped = TRUE),
+        independent_models = NA,
+        independence_policy = "not_applicable_falsification",
+        independence_gate_passed = TRUE, warning = warning
+      )
+    ))
+  }
   stage(0.59, paste0("PDF vision extraction: ", endpoint_label("vision"), " (LLM inference)"), "vision_extraction")
   vision <- ingest_extract_vision_lane(metadata, bundle, cfg)
   stage(0.76, paste0("PDF vision extraction complete", runtime_label(vision)), "vision_extraction")
@@ -488,18 +566,23 @@ ingest_dual_extract <- function(metadata, bundle, cfg = NULL, adjudicate = TRUE,
     paste(text_endpoint$provider, text_endpoint$model, sep = "|"),
     paste(vision_endpoint$provider, vision_endpoint$model, sep = "|")
   )
-  if (isTRUE(cfg$llm$require_independent_extraction_models) && !independent_models) {
+  independence_policy <- cfg$llm$extraction_independence %||% "required"
+  if (identical(independence_policy, "required") && !independent_models) {
     stop("Text and vision extraction roles must use different provider/model combinations.", call. = FALSE)
   }
   warning <- if (independent_models) "" else
     "Text and vision lanes use the same provider/model; input modalities are independent but model errors may be correlated."
+  if (isTRUE(adjudicate) && nzchar(warning)) {
+    .library_warn_correlated_extraction_lanes(warning)
+  }
 
   best <- .library_best_lane(text, vision)
   if (is.null(best)) {
     stage(1, "No valid extraction lane; article requires review", "complete")
     return(list(status = "needs_review", model_present = NA, extraction = NULL,
                 text = text, vision = vision, comparison = comparison,
-                adjudication = NULL, warning = warning,
+                adjudication = NULL, independent_models = independent_models,
+                warning = warning,
                 audit = list(
                   schema_version = LIBRARY_SCHEMA_VERSION,
                   prompt_version = LIBRARY_PROMPT_VERSION,
@@ -509,6 +592,9 @@ ingest_dual_extract <- function(metadata, bundle, cfg = NULL, adjudicate = TRUE,
                   comparison = comparison,
                   adjudication = list(error = "No valid extraction lane was available."),
                   independent_models = independent_models,
+                  independence_policy = independence_policy,
+                  independence_gate_passed = independent_models ||
+                    identical(independence_policy, "off"),
                   warning = warning
                 )))
   }
@@ -540,12 +626,26 @@ ingest_dual_extract <- function(metadata, bundle, cfg = NULL, adjudicate = TRUE,
     stage(0.95, paste0("Adjudication complete", runtime_label(adjudication)), "adjudication")
   }
   checks <- text$audit$deterministic_checks %||% text$checks %||% NULL
+  binding_checks <- text$audit$synthesis_binding_checks %||% NULL
   if (isTRUE(cfg$deliberative$enabled) && isTRUE(model_present) &&
-      is.list(checks) && !isTRUE(checks$ready)) {
+      ((is.list(checks) && !isTRUE(checks$ready)) ||
+       isTRUE(text$audit$synthesis_quarantined) ||
+       (is.list(binding_checks) && !isTRUE(binding_checks$ready)))) {
     status <- "needs_review"
     warning <- paste(Filter(nzchar, c(
       warning,
-      "The evidence-led investigation did not pass all deterministic completeness and consistency gates."
+      "The evidence-led investigation did not pass all deterministic completeness, consistency, and ledger-binding gates."
+    )), collapse = " ")
+  }
+  if (!independent_models && identical(independence_policy, "preferred") &&
+      status %in% c("machine_consistent", "machine_adjudicated")) {
+    status <- "needs_review"
+    warning <- paste(Filter(nzchar, c(
+      warning,
+      paste(
+        "Correlated extraction lanes are retained as exploratory evidence",
+        "and cannot receive a machine-consistent publication status."
+      )
     )), collapse = " ")
   }
   stage(1, "Extraction and reconciliation complete", "complete")
@@ -558,6 +658,9 @@ ingest_dual_extract <- function(metadata, bundle, cfg = NULL, adjudicate = TRUE,
     comparison = comparison,
     adjudication = adjudication,
     independent_models = independent_models,
+    independence_policy = independence_policy,
+    independence_gate_passed = independent_models ||
+      identical(independence_policy, "off"),
     warning = warning,
     audit = list(
       schema_version = LIBRARY_SCHEMA_VERSION,
@@ -568,6 +671,9 @@ ingest_dual_extract <- function(metadata, bundle, cfg = NULL, adjudicate = TRUE,
       comparison = comparison,
       adjudication = adjudication$audit %||% list(error = adjudication$error %||% ""),
       independent_models = independent_models,
+      independence_policy = independence_policy,
+      independence_gate_passed = independent_models ||
+        identical(independence_policy, "off"),
       warning = warning
     )
   )

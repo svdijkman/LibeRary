@@ -21,17 +21,23 @@ remain evidence-linked research candidates until reviewed.
    search structure, fixed effects, variability, observation model, population,
    dosing, and reproduction evidence separately; challenge the claims; search
    unresolved gaps; and synthesize only from the resulting evidence ledger.
-6. Independently extract and verify material claims from original PDF pages.
-7. Compare model, population, dosing, and digitized figure/table claims field by
-   field and use a third configured LLM to adjudicate discrepancies from the
-   source evidence.
+6. Use a separately configured vision model to falsify or qualify material
+   claims against original PDF pages. The former parallel one-shot extraction
+   path remains available only by explicit configuration.
+7. Require every synthesized claim to bind to a supporting evidence-ledger
+   entry; quarantine incomplete bindings before catalogue publication.
 8. Represent the canonical compartments, input, elimination, and parameterization;
    retain reported ADVAN/TRANS or infer common implementations with explicit
    confidence, rationale, alternatives, and review status.
 9. Publish recoverable models as versioned, reviewable NONMEM control streams
    that are compiled through LibeRation before use.
 10. Prepare a conservative LibeRation reproduction plan and, when sufficiently
-   evidenced, simulate the reported regimen against extracted concentration data.
+    evidenced, simulate the reported regimen against extracted concentration data.
+
+Acquisition that cannot be completed automatically creates a durable manual
+inbox request beside the expected PDF. Place the requested PDF there and rerun;
+`ingest_manual_inbox_requests()` lists pending and completed requests without
+discarding the investigation state.
 
 Every LLM role is selectable: abstract triage, investigation/synthesis, PDF
 vision verification, skeptical evidence review, and adjudication. Audits retain provider, exact

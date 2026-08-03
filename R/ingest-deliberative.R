@@ -42,6 +42,7 @@ DELIBERATIVE_SYNTHESIS_PROMPT <- paste(
   "reported_metric retain the publication scale. Complete every schema field compactly.",
   "Never turn narrative findings into demographic descriptors or duplicate the same fact.",
   "Use at most 20 short field_evidence records for the most material final-model fields,",
+  "and include one or more exact evidence-ledger claim_ids in every field_evidence record.",
   "at most 12 cohorts, and at most 30 distinct descriptors across the entire population."
 )
 
@@ -690,6 +691,89 @@ DELIBERATIVE_SYNTHESIS_PROMPT <- paste(
   )
 }
 
+.library_synthesis_material_domains <- function(extraction) {
+  parameters <- extraction$parameters %||% list()
+  structure <- extraction$structural_model %||% list()
+  population <- extraction$population_details %||% list()
+  present <- function(value) {
+    length(value) > 0L && any(nzchar(trimws(as.character(unlist(value)))))
+  }
+  domains <- character()
+  if (present(structure[c("advan", "trans", "compartments", "description")]) ||
+      length(structure$implementations %||% list())) {
+    domains <- c(domains, "structure")
+  }
+  if (length(parameters$theta %||% list())) domains <- c(domains, "theta")
+  if (length(parameters$omega %||% list()) ||
+      length(parameters$omega_covariance %||% list())) domains <- c(domains, "omega")
+  if (length(parameters$sigma %||% list()) || present(extraction$residual_error)) {
+    domains <- c(domains, "sigma")
+  }
+  if (length(extraction$covariates %||% list())) domains <- c(domains, "covariates")
+  if (present(extraction$population) || !is.null(extraction$n_subjects) ||
+      length(population$cohorts %||% list()) ||
+      length(population$descriptors %||% list())) {
+    domains <- c(domains, "population")
+  }
+  if (present(extraction$route) || length(extraction$dosing %||% list())) {
+    domains <- c(domains, "dosing")
+  }
+  if (length(extraction$reproduction_targets %||% list())) {
+    domains <- c(domains, "reproduction")
+  }
+  unique(domains)
+}
+
+.library_synthesis_binding_checks <- function(value, ledger) {
+  claims <- ledger$claims %||% list()
+  active <- Filter(function(claim) {
+    !nzchar(trimws(as.character(claim$superseded_by %||% "")[[1L]])) &&
+      !identical(claim$status %||% "", "unresolved")
+  }, claims)
+  active_ids <- vapply(active, function(claim) {
+    as.character(claim$id %||% "")[[1L]]
+  }, character(1))
+  names(active) <- active_ids
+  evidence <- value$field_evidence %||% list()
+  references <- lapply(evidence, function(item) {
+    unique(as.character(unlist(item$claim_ids %||% character())))
+  })
+  referenced <- unique(unlist(references, use.names = FALSE))
+  invalid <- setdiff(referenced[nzchar(referenced)], active_ids)
+  without_ids <- which(!vapply(references, function(ids) any(nzchar(ids)), logical(1)))
+  valid_referenced <- intersect(referenced, active_ids)
+  bound_domains <- unique(vapply(active[valid_referenced], function(claim) {
+    as.character(claim$domain %||% "other")[[1L]]
+  }, character(1)))
+  required_domains <- if (isTRUE(value$model_present)) {
+    .library_synthesis_material_domains(value$extraction %||% list())
+  } else character()
+  missing <- setdiff(required_domains, bound_domains)
+  errors <- character()
+  if (length(without_ids)) {
+    errors <- c(errors, paste0(
+      "Field-evidence records without claim IDs: ", paste(without_ids, collapse = ", "), "."
+    ))
+  }
+  if (length(invalid)) {
+    errors <- c(errors, paste0(
+      "Unknown or inactive ledger claim IDs: ", paste(invalid, collapse = ", "), "."
+    ))
+  }
+  if (length(missing)) {
+    errors <- c(errors, paste0(
+      "Major extraction domains without an active ledger binding: ",
+      paste(missing, collapse = ", "), "."
+    ))
+  }
+  list(
+    ready = !length(errors), required_domains = required_domains,
+    bound_domains = bound_domains, invalid_claim_ids = invalid,
+    evidence_records_without_claim_ids = without_ids,
+    missing_domains = missing, errors = errors
+  )
+}
+
 .library_stage_audit_summary <- function(audit) list(
   stage = audit$stage %||% "", role = audit$role %||% "",
   provider = audit$provider %||% "", model = audit$model %||% "",
@@ -732,6 +816,7 @@ ingest_deliberative_extract <- function(metadata, bundle, cfg = NULL, progress =
   topics <- .library_deliberative_topics()
   cache <- isTRUE(cfg$deliberative$cache_stages)
   stage_audits <- list()
+  visual_review <- NULL
   run_stage <- function(name, messages, schema, role, value, message, stage_cfg = NULL) {
     report(value, message, name)
     output <- .library_investigation_stage(
@@ -894,6 +979,7 @@ ingest_deliberative_extract <- function(metadata, bundle, cfg = NULL, progress =
       "Independent table/equation verification from PDF pages (vision LLM)",
       stage_cfg = visual_cfg
     )
+    visual_review <- visual
     ledger <- .library_ledger_apply_review(ledger, visual$value, "visual_verification")
   }
 
@@ -905,11 +991,53 @@ ingest_deliberative_extract <- function(metadata, bundle, cfg = NULL, progress =
   ledger_path <- file.path(ledger_dir, "evidence-ledger.json")
   .library_atomic_write(ledger, ledger_path)
 
+  if (!isTRUE(checks$ready)) {
+    limitations <- unique(c(
+      as.character(checks$errors %||% character()),
+      as.character(checks$warnings %||% character()),
+      "Final model synthesis was not run because the deterministic evidence gate failed."
+    ))
+    review_only <- list(
+      model_present = isTRUE(recon$value$model_present),
+      model_probability = as.numeric(recon$value$model_probability %||% 0),
+      recoverability = list(
+        overall = 0, structure = 0, parameters = 0,
+        variability = 0, covariates = 0, data = 0
+      ),
+      extraction = ingest_stub_extraction(
+        meta, "deterministic_consistency_gate_failed"
+      ),
+      field_evidence = list(), limitations = as.list(limitations)
+    )
+    audit <- list(
+      lane = "deliberative_text", pipeline = "evidence_led_deliberative",
+      pipeline_version = LIBRARY_PROMPT_VERSION,
+      evidence_ledger_path = normalizePath(
+        ledger_path, winslash = "/", mustWork = TRUE
+      ),
+      evidence_claim_count = length(ledger$claims),
+      open_question_count = length(ledger$questions),
+      deterministic_checks = checks,
+      synthesis_skipped = TRUE,
+      synthesis_skip_reason = "deterministic_consistency_gate_failed",
+      stages = lapply(stage_audits, .library_stage_audit_summary)
+    )
+    report(
+      1, "Evidence investigation requires review; synthesis was not run",
+      "deliberative_gate_blocked"
+    )
+    return(list(
+      available = TRUE, lane = "text", result = review_only, audit = audit,
+      evidence_ledger = ledger, checks = checks, visual_review = visual_review
+    ))
+  }
+
   synthesis_input <- paste0(
     "Create the final lane response for PMID ", meta$pmid, ". The evidence ledger, skeptical",
     "reviews and deterministic checks are the only permitted factual source. Populate the",
-    "final model, not base/candidate/validation models. field_evidence should cite ledger",
-    "claim ids. If coverage or consistency is insufficient, retain nulls and limitations.",
+    "final model, not base/candidate/validation models. Every field_evidence item must cite",
+    "one or more exact claim_ids from the ledger. If coverage or consistency is insufficient,",
+    "retain nulls and limitations.",
     "\n\nEVIDENCE LEDGER:\n",
     .library_compact_ledger(ledger, cfg$deliberative$synthesis_context_chars),
     "\n\nDETERMINISTIC CHECKS:\n",
@@ -932,10 +1060,11 @@ ingest_deliberative_extract <- function(metadata, bundle, cfg = NULL, progress =
     list(list(role = "system", content = .library_deliberative_instruction(
       cfg, "indexing", DELIBERATIVE_SYNTHESIS_PROMPT, synthesis = TRUE
     )), list(role = "user", content = synthesis_input)),
-    .library_lane_schema(), "indexing", 0.95,
+    .library_deliberative_lane_schema(), "indexing", 0.95,
     "Evidence-constrained final model synthesis (LLM)", stage_cfg = synthesis_cfg
   )
   value <- .library_enrich_lane_result(synthesis$value)
+  binding_checks <- .library_synthesis_binding_checks(value, ledger)
   retries <- sum(vapply(stage_audits, function(audit) {
     suppressWarnings(as.integer(audit$retry_count %||% 0L))
   }, integer(1)), na.rm = TRUE)
@@ -948,8 +1077,35 @@ ingest_deliberative_extract <- function(metadata, bundle, cfg = NULL, progress =
   audit$evidence_claim_count <- length(ledger$claims)
   audit$open_question_count <- length(ledger$questions)
   audit$deterministic_checks <- checks
+  audit$synthesis_binding_checks <- binding_checks
   audit$stages <- lapply(stage_audits, .library_stage_audit_summary)
+  if (!isTRUE(binding_checks$ready)) {
+    audit$synthesis_quarantined <- TRUE
+    audit$synthesis_quarantine_reason <- "ledger_binding_gate_failed"
+    review_only <- list(
+      model_present = isTRUE(recon$value$model_present),
+      model_probability = as.numeric(recon$value$model_probability %||% 0),
+      recoverability = list(
+        overall = 0, structure = 0, parameters = 0,
+        variability = 0, covariates = 0, data = 0
+      ),
+      extraction = ingest_stub_extraction(meta, "ledger_binding_gate_failed"),
+      field_evidence = list(),
+      limitations = as.list(unique(c(
+        as.character(binding_checks$errors),
+        "The synthesized extraction was quarantined because its material fields were not bound to active evidence-ledger claims."
+      )))
+    )
+    report(
+      1, "Synthesized model requires review; ledger bindings failed",
+      "deliberative_binding_gate_blocked"
+    )
+    return(list(
+      available = TRUE, lane = "text", result = review_only, audit = audit,
+      evidence_ledger = ledger, checks = checks, visual_review = visual_review
+    ))
+  }
   report(1, "Deliberative evidence investigation complete", "deliberative_complete")
   list(available = TRUE, lane = "text", result = value, audit = audit,
-       evidence_ledger = ledger, checks = checks)
+       evidence_ledger = ledger, checks = checks, visual_review = visual_review)
 }

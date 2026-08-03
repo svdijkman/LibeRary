@@ -106,9 +106,7 @@ library_list <- function(status = NULL, root = library_catalog_root()) {
   )
   required <- unique(as.character(model$INPUT %||% character()))
   for (name in setdiff(required, names(events))) {
-    upper <- toupper(name)
-    events[[name]] <- if (upper %in% c("WT", "WEIGHT")) 70 else
-      if (upper %in% c("AGE")) 40 else if (upper %in% c("SEX", "MALE")) 0 else 1
+    events[[name]] <- NA_real_
   }
   events
 }
@@ -180,23 +178,34 @@ library_qualification_check <- function(library_id, root = library_catalog_root(
     } else {
       compile$passed <- TRUE
       if (isTRUE(simulate)) {
-        simulation$attempted <- TRUE
-        result <- tryCatch(
-          LibeRation::nm_simulate(
-            control$model, .library_qualification_events(control$model),
-            random_effects = FALSE, residual = FALSE, seed = 1L
-          ),
-          error = identity
-        )
-        if (inherits(result, "error")) {
-          simulation$error <- conditionMessage(result)
-          blockers <- c(blockers, "simulation_smoke_test_failed")
+        required_covariates <- unique(as.character(
+          control$model$COVARIATES %||% character()
+        ))
+        if (length(required_covariates)) {
+          simulation$error <- paste0(
+            "Smoke simulation requires publication-grounded covariates: ",
+            paste(required_covariates, collapse = ", "), "."
+          )
+          blockers <- c(blockers, "qualification_covariates_unavailable")
         } else {
-          observed <- result$EVID == 0L
-          predicted <- suppressWarnings(as.numeric(result$IPRED[observed]))
-          simulation$finite_predictions <- sum(is.finite(predicted))
-          simulation$passed <- length(predicted) > 0L && all(is.finite(predicted))
-          if (!simulation$passed) blockers <- c(blockers, "non_finite_predictions")
+          simulation$attempted <- TRUE
+          result <- tryCatch(
+            LibeRation::nm_simulate(
+              control$model, .library_qualification_events(control$model),
+              random_effects = FALSE, residual = FALSE, seed = 1L
+            ),
+            error = identity
+          )
+          if (inherits(result, "error")) {
+            simulation$error <- conditionMessage(result)
+            blockers <- c(blockers, "simulation_smoke_test_failed")
+          } else {
+            observed <- result$EVID == 0L
+            predicted <- suppressWarnings(as.numeric(result$IPRED[observed]))
+            simulation$finite_predictions <- sum(is.finite(predicted))
+            simulation$passed <- length(predicted) > 0L && all(is.finite(predicted))
+            if (!simulation$passed) blockers <- c(blockers, "non_finite_predictions")
+          }
         }
       } else {
         simulation$passed <- NA
